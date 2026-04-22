@@ -104,8 +104,10 @@ ARCHITECTURE RULES (MANDATORY)
   2. ACTION METHODS for user interactions:
        filterBy(category) { this.filterChips.contains(category).click(); }
      Specs call actions: page.filterBy('Tech');
-- Specs MUST NOT chain .click(), .type(), .submit() etc. on getters.
-  Every interaction must be an action method on the Page Object.
+- Specs MUST NOT use cy.get(), cy.contains(), or chain .click(), .type(),
+  .submit() etc. ALL element access and user interactions go through Page
+  Object getters (for assertions) or action methods (for interactions).
+  If a spec has cy.get() or .click() in it, move that code into the PO.
 - Preserve ALL existing it() blocks — do NOT remove or rename passing tests.
   Only modify the failing test(s).
 

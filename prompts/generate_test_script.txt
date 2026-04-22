@@ -6,6 +6,47 @@ consumed by an automation pipeline that writes the files to disk and runs
 them unchanged.
 
 ================================================================================
+#1 RULE — READ THIS FIRST (HIGHEST PRIORITY)
+================================================================================
+Spec files MUST NOT contain cy.get(), cy.contains(), .click(), .type(),
+.submit(), .clear(), or any Cypress interaction command. ZERO exceptions.
+
+ALL element access and user interactions MUST live in the Page Object.
+Spec files contain ONLY: Page Object action method calls + .should() assertions.
+
+EXAMPLE — a signup spec:
+
+  // SPEC FILE (user-signup.cy.js) — actions + assertions only
+  page.openSignupModal();
+  page.fillSignupForm(testData.fullName, testData.email, testData.password);
+  page.submitSignup();
+  page.signupMessage.should('not.be.empty');
+  page.fullNameField.should('have.value', testData.fullName);
+
+  // PAGE OBJECT (SignupPage.js) — all cy.get/click/type lives HERE
+  get signupButton() { return cy.get('#auth-btns').contains('Sign Up'); }
+  get fullNameField() { return cy.get('#s-name'); }
+  get signupMessage() { return cy.get('#s-msg'); }
+  openSignupModal() { this.signupButton.click(); }
+  fillSignupForm(name, email, pass) {
+    this.fullNameField.type(name);
+    cy.get('#s-email').type(email);
+    cy.get('#s-pass').type(pass);
+  }
+  submitSignup() { cy.get('#form-signup').find('.msubmit').click(); }
+
+SIMILARLY for filter/browse — every .click() is a PO action method:
+
+  // SPEC: page.filterBy('Tech');
+  // PO:   filterBy(cat) { this.filterChips.contains(cat).click(); }
+
+Test data (names, emails, passwords) MUST come from a fixture file loaded
+via cy.fixture() in a before() hook. Include the fixture in your output.
+
+If you put cy.get() or .click() or .type() in a spec file, the output is
+REJECTED. This is non-negotiable.
+
+================================================================================
 INPUT CONTRACT
 ================================================================================
 The user message contains:
@@ -68,10 +109,40 @@ ARCHITECTURE RULES (MANDATORY)
        filterBy(category) { this.filterChips.contains(category).click(); }
        fillForm(name, email) { this.nameField.type(name); this.emailField.type(email); }
      Specs call actions: page.filterBy('Tech');
+- Specs MUST NOT use cy.get(), cy.contains(), or cy.wrap() directly.
+  ALL element access goes through Page Object getters or action methods.
 - Specs MUST NOT chain .click(), .type(), .submit(), .clear(), .check(),
-  .uncheck(), .select(), .trigger(), .scrollIntoView() directly on getters.
+  .uncheck(), .select(), .trigger(), .scrollIntoView() on anything.
   Wrap every user interaction in a Page Object action method instead.
 - Specs should ONLY contain: PO action calls + assertions (.should / expect).
+- Test data (names, emails, passwords) MUST come from cypress/fixtures/.
+  Load with cy.fixture() in a before() hook. Include the fixture file in
+  your "files" output.
+
+FORBIDDEN in spec files (will be rejected):
+  cy.get('#auth-btns').contains('Sign Up').click();     // NO — use PO action
+  cy.get('#s-name').type('John Doe');                   // NO — use PO action
+  page.signupButton.click();                            // NO — use PO action
+  page.fullNameField.type(testData.fullName);            // NO — use PO action
+
+REQUIRED pattern — spec files look like this:
+  page.openSignupModal();                               // PO action method
+  page.fillSignupForm(testData.fullName, testData.email, testData.password);
+  page.submitSignup();
+  page.signupMessage.should('not.be.empty');            // assertion only
+
+REQUIRED pattern — Page Object has the actions:
+  openSignupModal() {
+    cy.get('#auth-btns').contains('Sign Up').click();
+  }
+  fillSignupForm(fullName, email, password) {
+    cy.get('#s-name').type(fullName);
+    cy.get('#s-email').type(email);
+    cy.get('#s-pass').type(password);
+  }
+  submitSignup() {
+    cy.get('#form-signup').find('.msubmit').click();
+  }
 
 ================================================================================
 PAGE OBJECT REUSE (MANDATORY)
