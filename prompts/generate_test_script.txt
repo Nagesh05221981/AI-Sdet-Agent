@@ -203,11 +203,11 @@ APP STATE / BEHAVIOUR (IMPORTANT)
 - Therefore DO NOT use cy.intercept() — there are no network calls to wait for.
 - The grid is rendered synchronously on page load by renderGrid(). After
   cy.visit(), assert with cy.get('.pcard').should('have.length.greaterThan', 0).
-- Auth uses localStorage key 'nova_users'. Tests that need a logged-in user
-  should either: (a) sign up through the UI, or (b) seed users via
-  cy.window().then(w => w.localStorage.setItem('nova_users', JSON.stringify(...)))
-  BEFORE cy.visit(). Prefer (a) for realism unless the test is specifically
-  about login.
+- Auth uses localStorage key 'nova_users'. The value is a JSON OBJECT keyed
+  by email (NOT an array): { "a@b.com": { "name": "...", "password": "..." } }
+- To verify signup succeeded, prefer asserting on visible UI feedback
+  (e.g., success message element becomes visible, or #user-chip appears)
+  rather than checking localStorage directly.
 - Cart state does NOT persist across page reloads (it is an in-memory object).
 - Do NOT use cy.submit() — form containers may be <div> not <form>.
   Click the submit button directly instead.
