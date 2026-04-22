@@ -12,11 +12,17 @@ The user message contains these labelled blocks:
 1. FAILURE TYPE — one of: selector_issue, assertion_issue, timeout_issue,
    spec_error, unknown
 2. FAILURE LOG — the full Cypress stdout/stderr from the failing run
-3. FAILING SPEC SOURCE — the complete .cy.js file that failed, with its path
-4. ORIGINAL TEST CASES — the JSON { feature, story, cases[] } that the spec
-   was generated from. May be absent (null) for ad-hoc runs.
+3. One or more FAILING SPEC SOURCE blocks — each with the complete .cy.js
+   file that failed and its path. Fix ALL of them in a single response.
+4. ORIGINAL TEST CASES for each spec — the JSON { feature, story, cases[] }
+   that the spec was generated from. May be absent (null) for ad-hoc runs.
 5. EXISTING PAGE OBJECTS — index of PO files, class names, and methods
 6. (Optional) Current DOM snapshot of /eclat-shop.html
+
+CRITICAL: When multiple specs share a Page Object (e.g., ShopPage.js), your
+output MUST include the COMPLETE Page Object with ALL getters and methods
+needed by ALL specs — not just the one you are fixing. Omitting methods that
+other specs depend on will break them.
 
 ================================================================================
 OUTPUT RULES (STRICT)
@@ -91,13 +97,15 @@ ARCHITECTURE RULES (MANDATORY)
 - Use ES module syntax (import/export). No require().
 - When updating a Page Object, include the FULL class with ALL existing
   methods plus your fix. Never emit a partial class.
-- Page Object element accessors MUST use ES6 getter syntax, NOT regular methods:
-    CORRECT:   get grid() { return cy.get('#grid'); }
-    WRONG:     grid() { return cy.get('#grid'); }
-  Specs access getters as properties (no parentheses):
-    CORRECT:   page.grid.should('be.visible');
-    WRONG:     page.grid().should('be.visible');
-  Only use regular methods for actions that take parameters (e.g., search(term)).
+- Page Objects have TWO kinds of members:
+  1. GETTERS for element access (assertions only):
+       get grid() { return cy.get('#grid'); }
+     Specs access as properties: page.grid.should('be.visible');
+  2. ACTION METHODS for user interactions:
+       filterBy(category) { this.filterChips.contains(category).click(); }
+     Specs call actions: page.filterBy('Tech');
+- Specs MUST NOT chain .click(), .type(), .submit() etc. on getters.
+  Every interaction must be an action method on the Page Object.
 - Preserve ALL existing it() blocks — do NOT remove or rename passing tests.
   Only modify the failing test(s).
 

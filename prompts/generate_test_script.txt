@@ -60,13 +60,18 @@ ARCHITECTURE RULES (MANDATORY)
 - Page Objects MUST NOT call cy.visit (or any other navigation primitive).
   Page Objects only model elements and actions that operate on an already-
   loaded page. Navigation is a test concern, not a page concern.
-- Page Object element accessors MUST use ES6 getter syntax, NOT regular methods:
-    CORRECT:   get grid() { return cy.get('#grid'); }
-    WRONG:     grid() { return cy.get('#grid'); }
-  Specs access getters as properties (no parentheses):
-    CORRECT:   page.grid.should('be.visible');
-    WRONG:     page.grid().should('be.visible');
-  Only use regular methods for actions that take parameters (e.g., search(term)).
+- Page Objects have TWO kinds of members:
+  1. GETTERS for element access (used in specs for assertions only):
+       get grid() { return cy.get('#grid'); }
+     Specs access as properties: page.grid.should('be.visible');
+  2. ACTION METHODS for user interactions (clicks, typing, form submissions):
+       filterBy(category) { this.filterChips.contains(category).click(); }
+       fillForm(name, email) { this.nameField.type(name); this.emailField.type(email); }
+     Specs call actions: page.filterBy('Tech');
+- Specs MUST NOT chain .click(), .type(), .submit(), .clear(), .check(),
+  .uncheck(), .select(), .trigger(), .scrollIntoView() directly on getters.
+  Wrap every user interaction in a Page Object action method instead.
+- Specs should ONLY contain: PO action calls + assertions (.should / expect).
 
 ================================================================================
 PAGE OBJECT REUSE (MANDATORY)
@@ -179,6 +184,13 @@ APP STATE / BEHAVIOUR (IMPORTANT)
   BEFORE cy.visit(). Prefer (a) for realism unless the test is specifically
   about login.
 - Cart state does NOT persist across page reloads (it is an in-memory object).
+- #form-login and #form-signup are <div> elements (class "mform"), NOT <form>
+  tags. Do NOT use cy.submit() on them. Instead click the .msubmit button
+  inside the form: cy.get('#form-signup').find('.msubmit').click()
+- Signup submit button text is exactly "Create Account" (capital A).
+  Login submit button text is exactly "Log In".
+  Use .find('.msubmit').click() rather than cy.contains() for submit buttons
+  to avoid case-sensitivity issues.
 - #results-info shows text like "18 products" (a count followed by "products").
   Do NOT assume it contains the word "results". Assert with
   .should('not.be.empty') or .invoke('text').should('match', /\d+ products/).
@@ -196,6 +208,13 @@ TEST RULES
   for assertions.
 - Tests must be runnable under Cypress v15+ with no extra plugins.
 - One spec per feature; the file name should be the slugified feature name.
+- Do NOT hardcode test data (names, emails, passwords, etc.) in specs.
+  Instead, create a fixture file under cypress/fixtures/<name>.json and load
+  it with cy.fixture() in a before() hook. Example:
+    let testData;
+    before(() => { cy.fixture('users').then(d => { testData = d.signup; }); });
+  Then reference testData.fullName, testData.email, etc. in tests.
+  Include the fixture file in your "files" output array.
 
 ================================================================================
 OUTPUT SHAPE (FINAL REMINDER)

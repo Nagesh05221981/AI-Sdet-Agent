@@ -21,6 +21,21 @@ async function flushLangSmith() {
   }
 }
 
+// --- Log trail --------------------------------------------------------------
+const LOG_FILE = "pipeline.log";
+const _logLines = [];
+
+function log(stage, action, detail = "") {
+  const ts = new Date().toISOString().replace("T", " ").slice(0, 19);
+  const line = `[${ts}] [${stage}] ${action}${detail ? " — " + detail : ""}`;
+  _logLines.push(line);
+  console.log(line);
+}
+
+function flushLogTrail() {
+  fs.writeFileSync(LOG_FILE, _logLines.join("\n") + "\n", "utf-8");
+}
+
 // --- Config -----------------------------------------------------------------
 const STORIES_DIR = "stories";
 const DOM_SNAPSHOT_PATH = "cypress/dom-snapshots/homepage.html";
@@ -32,12 +47,12 @@ const DOM_TRUNCATE_CHARS = 8000;
 // --- Helpers ----------------------------------------------------------------
 function readDomSnapshotIfExists() {
   try {
-    return fs.readFileSync(DOM_SNAPSHOT_PATH, "utf-8");
+    const dom = fs.readFileSync(DOM_SNAPSHOT_PATH, "utf-8");
+    log("INIT", "DOM snapshot loaded", `${DOM_SNAPSHOT_PATH} (${dom.length} chars)`);
+    return dom;
   } catch (e) {
     if (e.code === "ENOENT") {
-      console.log(
-        `ℹ️  No DOM snapshot at ${DOM_SNAPSHOT_PATH} yet — first run will create it.`
-      );
+      log("INIT", "No DOM snapshot found", "first run will create it");
       return null;
     }
     throw e;
@@ -54,7 +69,7 @@ function writeGeneratedFiles(files) {
     const fullPath = path.resolve(file.path);
     fs.mkdirSync(path.dirname(fullPath), { recursive: true });
     fs.writeFileSync(fullPath, file.content, "utf-8");
-    console.log("✅ Written:", file.path);
+    log("WRITE", "File written", `${file.path} (${file.content.length} chars)`);
     written.push(file.path);
   }
   return written;
@@ -126,13 +141,14 @@ function findTestCasesForSpec(specPath, generated) {
 
 async function fixAndRetry(generated, dom) {
   for (let attempt = 1; attempt <= MAX_FIX_RETRIES; attempt++) {
-    console.log(`\n🔧 Fix attempt ${attempt}/${MAX_FIX_RETRIES}`);
+    log("STAGE-4", `Fix attempt ${attempt}/${MAX_FIX_RETRIES}`);
 
     const failureLog = fs.readFileSync("cypress-failure.log", "utf-8");
     const failureType = classifyFailure(failureLog);
+    log("STAGE-4", "Failure classified", `type=${failureType}`);
 
     if (INFRA_FAILURES.has(failureType)) {
-      console.log(`⛔ Infrastructure failure (${failureType}) — cannot fix spec code.`);
+      log("STAGE-4", "BAIL — infrastructure failure", failureType);
       return false;
     }
 
@@ -144,54 +160,67 @@ async function fixAndRetry(generated, dom) {
     }
 
     const poIndex = buildPageObjectIndexBlock(PAGES_DIR);
-    let anyFileWritten = false;
 
+    // Build a single fixer prompt with ALL failing specs so the LLM sees
+    // the full picture and doesn't clobber shared Page Objects.
+    const specBlocks = [];
     for (const specPath of failingSpecPaths) {
       if (!fs.existsSync(specPath)) {
-        console.warn(`⚠️  Spec not found on disk: ${specPath}`);
+        log("STAGE-4", "Spec not found, skipping", specPath);
         continue;
       }
-
       const specSource = fs.readFileSync(specPath, "utf-8");
       const testCases = findTestCasesForSpec(specPath, generated);
+      specBlocks.push(
+        `FAILING SPEC SOURCE (${specPath}):\n${specSource}\n\n` +
+        `ORIGINAL TEST CASES FOR ${specPath}:\n${JSON.stringify(testCases, null, 2)}`
+      );
+    }
 
-      const userMsg = [
-        `FAILURE TYPE: ${failureType}`,
-        ``,
-        `FAILURE LOG:\n${failureLog}`,
-        ``,
-        `FAILING SPEC SOURCE (${specPath}):\n${specSource}`,
-        ``,
-        `ORIGINAL TEST CASES:\n${JSON.stringify(testCases, null, 2)}`,
-        ``,
-        poIndex,
-      ].join("\n");
+    if (specBlocks.length === 0) {
+      log("STAGE-4", "No failing specs found on disk. Aborting.");
+      return false;
+    }
 
-      const fullMsg = withDomBlock(userMsg, dom);
+    const userMsg = [
+      `FAILURE TYPE: ${failureType}`,
+      ``,
+      `FAILURE LOG:\n${failureLog}`,
+      ``,
+      `NUMBER OF FAILING SPECS: ${specBlocks.length}`,
+      `Fix ALL of them in a single response. Include the FULL content of every`,
+      `file you change — especially shared Page Objects that multiple specs use.`,
+      ``,
+      ...specBlocks,
+      ``,
+      poIndex,
+    ].join("\n");
 
-      console.log(`🤖 Invoking fixer for ${specPath} (type: ${failureType})...`);
-      const result = await testFixerAgent.invoke({
-        messages: [{ role: "user", content: fullMsg }],
-      });
+    const fullMsg = withDomBlock(userMsg, dom);
 
-      const raw = result.messages.at(-1).content;
-      console.log("\n===== FIXER RAW OUTPUT =====\n");
-      console.log(raw);
+    log("STAGE-4", "Invoking fixer agent", `${specBlocks.length} failing spec(s), type=${failureType}`);
+    const result = await testFixerAgent.invoke({
+      messages: [{ role: "user", content: fullMsg }],
+    });
 
-      let parsed;
-      try {
-        parsed = extractJson(raw);
-      } catch (e) {
-        console.warn(`⚠️  Fixer output is not valid JSON: ${e.message}`);
-        continue;
-      }
+    const raw = result.messages.at(-1).content;
+    log("STAGE-4", "Fixer agent responded", `${raw.length} chars`);
 
-      if (parsed.files && Array.isArray(parsed.files) && parsed.files.length > 0) {
-        writeGeneratedFiles(parsed.files);
-        anyFileWritten = true;
-      } else if (parsed.reason) {
-        console.log(`ℹ️  Fixer declined: ${parsed.reason}`);
-      }
+    let parsed;
+    let anyFileWritten = false;
+    try {
+      parsed = extractJson(raw);
+    } catch (e) {
+      log("STAGE-4", "JSON parse FAILED", e.message);
+      continue;
+    }
+
+    if (parsed.files && Array.isArray(parsed.files) && parsed.files.length > 0) {
+      log("STAGE-4", "Fixer output", `${parsed.files.length} file(s): ${parsed.files.map(f => f.path).join(", ")}`);
+      writeGeneratedFiles(parsed.files);
+      anyFileWritten = true;
+    } else if (parsed.reason) {
+      log("STAGE-4", "Fixer declined", parsed.reason);
     }
 
     if (!anyFileWritten) {
@@ -199,18 +228,18 @@ async function fixAndRetry(generated, dom) {
       return false;
     }
 
-    console.log(`\n🚀 Re-running Cypress (attempt ${attempt})...\n`);
+    log("STAGE-4", "Re-running Cypress", `attempt ${attempt}`);
     const { ok } = await runCypress([SPEC_GLOB]);
 
     if (ok) {
-      console.log(`\n✅ Cypress passed after fix attempt ${attempt}`);
+      log("STAGE-4", "Cypress PASSED", `fixed on attempt ${attempt}`);
       return true;
     }
 
-    console.log(`\n❌ Cypress still failing after fix attempt ${attempt}`);
+    log("STAGE-4", "Cypress still FAILING", `attempt ${attempt}`);
   }
 
-  console.error(`\n💥 All ${MAX_FIX_RETRIES} fix attempts exhausted. Tests still failing.`);
+  log("STAGE-4", "EXHAUSTED", `all ${MAX_FIX_RETRIES} fix attempts failed`);
   return false;
 }
 
@@ -282,22 +311,24 @@ function resolveStoriesToRun() {
 
 // --- Stage 1: design test cases --------------------------------------------
 async function designTestCases(slug, story, dom) {
-  console.log(`\n🧠 Stage 1 — designing test cases for '${slug}'...\n`);
+  log("STAGE-1", "Designing test cases", `slug=${slug}`);
+  log("STAGE-1", "LLM input prepared", `story (${story.length} chars) + DOM ${dom ? "yes" : "no"}`);
 
   const userMsg = withDomBlock(`User story:\n${story}`, dom);
 
+  log("STAGE-1", "Invoking designer agent...");
   const result = await testDesignerAgent.invoke({
     messages: [{ role: "user", content: userMsg }],
   });
 
   const raw = result.messages.at(-1).content;
-  console.log("\n===== DESIGNER RAW OUTPUT =====\n");
-  console.log(raw);
+  log("STAGE-1", "Designer agent responded", `${raw.length} chars`);
 
   let cases;
   try {
     cases = extractJson(raw);
   } catch (e) {
+    log("STAGE-1", "JSON parse FAILED", e.message);
     throw new Error("Designer output is not valid JSON: " + e.message);
   }
 
@@ -305,42 +336,46 @@ async function designTestCases(slug, story, dom) {
     throw new Error("Designer output missing non-empty 'cases' array");
   }
 
-  // Persist to disk: filename keyed by the story slug, not by feature title,
-  // so re-running the same story overwrites the same JSON file (idempotent).
   fs.mkdirSync(TEST_CASES_DIR, { recursive: true });
   const casesPath = path.join(TEST_CASES_DIR, `${slug}.json`);
   fs.writeFileSync(casesPath, JSON.stringify(cases, null, 2), "utf-8");
-  console.log(
-    `\n📋 Designed ${cases.cases.length} case(s) for "${cases.feature}" → ${casesPath}`
-  );
+  log("STAGE-1", "Test cases written", `${cases.cases.length} case(s) → ${casesPath}`);
+
+  for (const tc of cases.cases) {
+    log("STAGE-1", `  ${tc.id}: ${tc.title}`, `priority=${tc.priority}`);
+  }
 
   return { cases, casesPath };
 }
 
 // --- Stage 2: generate Cypress files ---------------------------------------
 async function generateCypressFiles(slug, cases, dom) {
-  console.log(`\n🛠  Stage 2 — generating Cypress spec + Page Object for '${slug}'...\n`);
+  log("STAGE-2", "Generating Cypress spec + Page Object", `slug=${slug}`);
 
   const poIndex = buildPageObjectIndexBlock(PAGES_DIR);
+  log("STAGE-2", "PO index built", poIndex.split("\n")[0]);
+
   const userMsg = withDomBlock(
     `Story slug (use as the spec filename): ${slug}\n\n` +
       `Test cases:\n${JSON.stringify(cases, null, 2)}\n\n` +
       `${poIndex}`,
     dom
   );
+  log("STAGE-2", "LLM input prepared", `${userMsg.length} chars`);
 
+  log("STAGE-2", "Invoking generator agent...");
   const result = await testGeneratorAgent.invoke({
     messages: [{ role: "user", content: userMsg }],
   });
 
   const raw = result.messages.at(-1).content;
-  console.log("\n===== GENERATOR RAW OUTPUT =====\n");
-  console.log(raw);
+  log("STAGE-2", "Generator agent responded", `${raw.length} chars`);
 
   let parsed;
   try {
     parsed = extractJson(raw);
   } catch (e) {
+    log("STAGE-2", "JSON parse FAILED", e.message);
     throw new Error("Generator output is not valid JSON: " + e.message);
   }
 
@@ -351,6 +386,7 @@ async function generateCypressFiles(slug, cases, dom) {
     throw new Error("Generator output missing files array");
   }
 
+  log("STAGE-2", "Files to write", `${parsed.files.length} file(s): ${parsed.files.map(f => f.path).join(", ")}`);
   const written = writeGeneratedFiles(parsed.files);
   const specFiles = written.filter(
     (p) => p.startsWith("cypress/e2e/") && p.endsWith(".cy.js")
@@ -364,22 +400,22 @@ async function generateCypressFiles(slug, cases, dom) {
 
 // --- Per-story pipeline (Stages 1 + 2 only) --------------------------------
 async function generateForStory(story, dom) {
-  console.log(`\n=========================================================`);
-  console.log(`📖 Story '${story.slug}'  (source: ${story.source})`);
-  console.log(`=========================================================`);
-  console.log(story.text);
+  log("STORY", "Reading story", `slug=${story.slug}, source=${story.source}`);
+  log("STORY", "Story content", `${story.text.length} chars`);
 
   const { cases } = await designTestCases(story.slug, story.text, dom);
   const specFiles = await generateCypressFiles(story.slug, cases, dom);
+
+  log("STORY", "Story complete", `slug=${story.slug}, feature="${cases.feature}", specs=[${specFiles.join(", ")}]`);
   return { slug: story.slug, feature: cases.feature, cases, specFiles };
 }
 
 // --- Main -------------------------------------------------------------------
 async function runAISDET() {
-  console.log(`\n🤖 AI-SDET pipeline starting`);
+  log("INIT", "Pipeline starting");
 
   const stories = resolveStoriesToRun();
-  console.log(`🗂  ${stories.length} story/stories to process: ${stories.map((s) => s.slug).join(", ")}\n`);
+  log("INIT", "Stories resolved", `${stories.length} story/stories: ${stories.map((s) => s.slug).join(", ")}`);
 
   const dom = readDomSnapshotIfExists();
 
@@ -395,17 +431,18 @@ async function runAISDET() {
     }
   }
 
-  // Stage 3 — run the entire spec suite together so cross-story regressions
-  // surface (e.g., a new story breaking a shared Page Object).
-  console.log(`\n🚀 Stage 3 — running Cypress against ${SPEC_GLOB}\n`);
+  // Stage 3 — run the entire spec suite
+  log("STAGE-3", "Running Cypress", `spec glob: ${SPEC_GLOB}`);
   const { ok, status, output } = await runCypress([SPEC_GLOB]);
 
   if (ok) {
-    console.log(`\n✅ Cypress passed for all ${generated.length} story/stories`);
+    log("STAGE-3", "Cypress PASSED", `all ${generated.length} story/stories`);
+    log("DONE", "Pipeline complete", "all tests passing");
+    flushLogTrail();
     return;
   }
 
-  console.log(`\n❌ Cypress failed with exit ${status}`);
+  log("STAGE-3", "Cypress FAILED", `exit code ${status}`);
 
   const context = {
     timestamp: new Date().toISOString(),
@@ -427,11 +464,10 @@ async function runAISDET() {
     JSON.stringify(context, null, 2)
   );
 
-  console.log("📝 Wrote cypress-failure.log and cypress-failure-context.json");
-  console.log("    Failure type:", context.type);
+  log("STAGE-3", "Failure context written", `type=${context.type}, log=cypress-failure.log`);
 
   // Stage 4 — self-healing retry loop
-  console.log(`\n🔄 Stage 4 — entering self-healing fix loop`);
+  log("STAGE-4", "Entering self-healing fix loop", `max retries: ${MAX_FIX_RETRIES}`);
   const fixed = await fixAndRetry(generated, dom);
 
   if (!fixed) {
@@ -454,12 +490,16 @@ async function runAISDET() {
     );
   }
 
-  console.log("🎉 Pipeline completed — all tests passing after self-heal.");
+  log("DONE", "Pipeline complete", "all tests passing after self-heal");
+  flushLogTrail();
 }
 
 runAISDET()
   .catch((err) => {
-    console.error("\n💥 AI-SDET run aborted:", err.message);
+    log("ERROR", "Pipeline aborted", err.message);
     process.exitCode = 1;
   })
-  .finally(flushLangSmith);
+  .finally(() => {
+    flushLogTrail();
+    return flushLangSmith();
+  });
