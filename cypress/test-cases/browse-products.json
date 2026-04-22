@@ -1,0 +1,33 @@
+{
+  "feature": "Browse Products",
+  "story": "User opens the Eclat shop and can see the product listing",
+  "cases": [
+    {
+      "id": "TC-01",
+      "title": "Grid renders on load",
+      "given": "User opens /eclat-shop.html",
+      "when": "the page finishes rendering",
+      "then": "at least one .pcard is visible and #results-info shows a non-empty count",
+      "selectors_hint": [
+        "#grid",
+        ".pcard",
+        "#results-info"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-02",
+      "title": "Product cards display correct information",
+      "given": "Grid is rendered",
+      "when": "user inspects the first .pcard",
+      "then": ".pcard-name, .pcard-cat, and .pcard-price are all visible and non-empty",
+      "selectors_hint": [
+        ".pcard",
+        ".pcard-name",
+        ".pcard-cat",
+        ".pcard-price"
+      ],
+      "priority": "medium"
+    }
+  ]
+}

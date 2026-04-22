@@ -1,0 +1,7 @@
+node_modules/
+.env
+cypress/dom-snapshots/
+cypress/screenshots/
+cypress/videos/
+cypress-failure.log
+cypress-failure-context.json

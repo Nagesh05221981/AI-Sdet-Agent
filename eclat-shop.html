@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVA — Modern Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0E0E0F;
+  --surface: #161618;
+  --card: #1C1C1F;
+  --border: rgba(255,255,255,0.07);
+  --text: #F0EEE9;
+  --muted: #888580;
+  --accent: #E8C547;
+  --accent2: #E05B3A;
+  --green: #4CAF82;
+  --radius: 14px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ─── NAV ─────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(14,14,15,0.85);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 48px;
+  height: 68px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 4px;
+  color: var(--text);
+}
+.nav-logo span { color: var(--accent); }
+.nav-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 8px 18px;
+  width: 340px;
+}
+.nav-center input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: 'Outfit', sans-serif;
+  font-size: 14px; flex: 1;
+}
+.nav-center input::placeholder { color: var(--muted); }
+.search-icon { color: var(--muted); font-size: 15px; }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+.btn { 
+  padding: 8px 20px; border-radius: 50px; border: none;
+  font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all .2s; letter-spacing: .5px;
+}
+.btn-ghost {
+  background: none; color: var(--muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+.btn-fill { background: var(--text); color: var(--bg); font-weight: 600; }
+.btn-fill:hover { background: var(--accent); }
+.btn-accent { background: var(--accent); color: var(--bg); font-weight: 700; }
+.btn-accent:hover { background: #f0d060; }
+
+.cart-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 8px 16px; border-radius: 50px; cursor: pointer;
+  font-size: 13px; font-weight: 500; transition: all .2s;
+  color: var(--text);
+}
+.cart-pill:hover { border-color: var(--accent); color: var(--accent); }
+.cart-pill .badge {
+  background: var(--accent); color: var(--bg);
+  width: 20px; height: 20px; border-radius: 50%;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+#user-chip {
+  display: none;
+  align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 6px 14px; border-radius: 50px; font-size: 13px; color: var(--muted);
+}
+#user-chip .uname { color: var(--text); font-weight: 500; }
+
+/* ─── HERO ─────────────────────────── */
+.hero {
+  padding: 80px 48px 60px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  border-bottom: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -120px; right: -80px;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,197,71,.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--accent); font-weight: 600; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.hero-eyebrow::before { content:''; display:block; width:24px; height:1px; background:var(--accent); }
+.hero h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 62px; line-height: 1.08; margin-bottom: 22px;
+  font-weight: 400;
+}
+.hero h1 em { color: var(--accent); font-style: italic; }
+.hero p { color: var(--muted); font-size: 16px; line-height: 1.7; max-width: 420px; margin-bottom: 36px; }
+.hero-actions { display: flex; gap: 14px; }
+.hero-stats {
+  display: flex; flex-direction: column; gap: 28px;
+  align-items: flex-end;
+}
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px 32px;
+  width: 200px; text-align: right;
+}
+.stat-num {
+  font-family: 'Syne', sans-serif; font-size: 38px; font-weight: 700;
+  color: var(--accent); line-height: 1;
+}
+.stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; letter-spacing: 1px; }
+
+/* ─── FILTERS ─────────────────────────── */
+.filters-bar {
+  padding: 28px 48px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+}
+.filter-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-right: 6px; }
+.fchip {
+  padding: 7px 18px; border-radius: 50px;
+  border: 1px solid var(--border); background: none;
+  font-family: 'Outfit', sans-serif; font-size: 13px;
+  color: var(--muted); cursor: pointer; transition: all .2s;
+}
+.fchip:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+.fchip.active { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+
+/* ─── CATALOGUE ─────────────────────────── */
+.catalogue {
+  padding: 48px;
+}
+.cat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 36px;
+}
+.cat-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 36px; font-weight: 400;
+}
+#results-info { font-size: 13px; color: var(--muted); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.pcard {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform .25s, border-color .25s, box-shadow .25s;
+  cursor: default;
+}
+.pcard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(232,197,71,.3);
+  box-shadow: 0 16px 40px rgba(0,0,0,.4);
+}
+.pcard-img {
+  height: 180px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 64px;
+  background: var(--surface);
+  position: relative;
+}
+.pcard-tag {
+  position: absolute; top: 12px; left: 12px;
+  padding: 4px 10px; border-radius: 4px;
+  font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
+}
+.tag-sale { background: rgba(224,91,58,.2); color: var(--accent2); border: 1px solid rgba(224,91,58,.3); }
+.tag-new { background: rgba(76,175,130,.2); color: var(--green); border: 1px solid rgba(76,175,130,.3); }
+
+.pcard-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }
+.pcard-cat { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+.pcard-name { font-family: 'Instrument Serif', serif; font-size: 18px; line-height: 1.3; margin-bottom: 6px; flex: 1; }
+.pcard-desc { font-size: 12px; color: var(--muted); line-height: 1.55; margin-bottom: 16px; }
+.pcard-footer { display: flex; align-items: center; justify-content: space-between; }
+.pcard-price { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); }
+.add-btn {
+  padding: 9px 16px; border-radius: 8px; border: none;
+  background: var(--surface); color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border); transition: all .2s;
+}
+.add-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+.add-btn.added { background: rgba(76,175,130,.15); color: var(--green); border-color: rgba(76,175,130,.4); }
+
+.no-results { text-align: center; padding: 100px 0; color: var(--muted); font-size: 16px; display: none; }
+.no-results .big { font-size: 48px; margin-bottom: 16px; }
+
+/* ─── CART DRAWER ─────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.6);
+  z-index: 100; opacity: 0; pointer-events: none; transition: opacity .3s;
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+
+.drawer {
+  position: fixed; top: 0; right: -480px; width: 460px; height: 100vh;
+  background: var(--surface); border-left: 1px solid var(--border);
+  z-index: 101; transition: right .35s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
+}
+.drawer.open { right: 0; }
+
+.drawer-head {
+  padding: 28px 30px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.drawer-head h2 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; }
+.x-btn { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; transition: color .2s; }
+.x-btn:hover { color: var(--text); }
+
+.drawer-body { flex: 1; overflow-y: auto; padding: 20px 30px; }
+.drawer-empty { text-align: center; padding: 80px 0; color: var(--muted); }
+.drawer-empty .ei { font-size: 48px; margin-bottom: 16px; }
+
+.ci {
+  display: flex; gap: 14px; padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  animation: fadeSlide .2s ease;
+}
+@keyframes fadeSlide { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:none; } }
+.ci-emoji {
+  width: 58px; height: 58px; border-radius: 10px;
+  background: var(--card); display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.ci-info { flex: 1; }
+.ci-name { font-size: 14px; font-weight: 500; margin-bottom: 3px; line-height: 1.3; }
+.ci-sub { font-size: 13px; color: var(--accent); font-weight: 600; }
+.ci-qty { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.qbtn {
+  width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border);
+  background: none; color: var(--text); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all .2s;
+}
+.qbtn:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.qval { font-size: 13px; font-weight: 600; min-width: 18px; text-align: center; }
+.del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; align-self: flex-start; transition: color .2s; padding: 4px; }
+.del-btn:hover { color: var(--accent2); }
+
+.drawer-foot {
+  padding: 22px 30px 28px;
+  border-top: 1px solid var(--border);
+}
+.total-row {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+}
+.total-label { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.total-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; color: var(--accent); }
+.checkout-btn {
+  width: 100%; padding: 15px; border-radius: 10px; border: none;
+  background: var(--accent); color: var(--bg);
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; cursor: pointer; transition: all .2s;
+}
+.checkout-btn:hover { background: #f0d060; transform: translateY(-1px); }
+.checkout-btn:disabled { background: #333; color: var(--muted); cursor: not-allowed; transform: none; }
+
+/* ─── AUTH MODAL ─────────────────────────── */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  z-index: 200; display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; width: 420px; max-width: 92vw;
+  padding: 48px 44px;
+  animation: popUp .3s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+}
+@keyframes popUp { from { transform:scale(.88) translateY(20px); opacity:0; } to { transform:none; opacity:1; } }
+.modal-close {
+  position: absolute; top: 18px; right: 18px;
+  background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer;
+  transition: color .2s;
+}
+.modal-close:hover { color: var(--text); }
+.modal-tabs {
+  display: flex; gap: 0; border: 1px solid var(--border); border-radius: 10px;
+  padding: 4px; margin-bottom: 32px;
+}
+.mtab {
+  flex: 1; padding: 9px; text-align: center; border-radius: 8px;
+  font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600;
+  cursor: pointer; color: var(--muted); transition: all .2s;
+}
+.mtab.active { background: var(--accent); color: var(--bg); }
+.mform { display: none; }
+.mform.active { display: block; }
+.mform h3 { font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; margin-bottom: 6px; }
+.mform .sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 7px; }
+.field input {
+  width: 100%; padding: 12px 16px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 14px; outline: none;
+  transition: border .2s;
+}
+.field input:focus { border-color: var(--accent); }
+.field input::placeholder { color: var(--muted); }
+.msubmit {
+  width: 100%; padding: 13px; border-radius: 10px; border: none;
+  background: var(--accent); color: var(--bg);
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; cursor: pointer; margin-top: 6px; transition: all .2s;
+}
+.msubmit:hover { background: #f0d060; }
+.mmsg { font-size: 13px; margin-top: 12px; min-height: 18px; }
+.mmsg.err { color: var(--accent2); }
+.mmsg.ok { color: var(--green); }
+
+/* ─── ORDER CONFIRM ─────────────────────────── */
+.confirm-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  z-index: 300; display: none; align-items: center; justify-content: center;
+}
+.confirm-modal.open { display: flex; }
+.cbox {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 56px 48px; max-width: 420px; width: 90%;
+  text-align: center; animation: popUp .35s cubic-bezier(.34,1.56,.64,1);
+}
+.cbox .icon { font-size: 64px; margin-bottom: 20px; }
+.cbox h2 { font-family: 'Instrument Serif', serif; font-size: 32px; margin-bottom: 10px; }
+.cbox p { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 24px; }
+.oid {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 20px; font-family: 'Syne', sans-serif;
+  font-size: 13px; letter-spacing: 2px; color: var(--accent); margin-bottom: 32px;
+}
+.cbox .btn-accent { padding: 13px 36px; border-radius: 10px; font-family:'Syne',sans-serif; font-size:13px; letter-spacing:2px; }
+
+/* ─── FOOTER ─────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  color: var(--muted); font-size: 13px;
+}
+.foot-logo { font-family: 'Syne', sans-serif; font-weight: 800; letter-spacing: 3px; font-size: 16px; color: var(--text); }
+.foot-logo span { color: var(--accent); }
+
+@media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .nav-center { display: none; }
+  .hero { grid-template-columns: 1fr; padding: 48px 20px 40px; gap: 40px; }
+  .hero h1 { font-size: 40px; }
+  .hero-stats { flex-direction: row; align-items: stretch; }
+  .stat-card { width: auto; flex: 1; }
+  .filters-bar, .catalogue { padding: 20px; }
+  .drawer { width: 100%; right: -100%; }
+  footer { flex-direction: column; gap: 12px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">NO<span>V</span>A</div>
+  <div class="nav-center">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search-input" placeholder="Search products…" oninput="applyFilters()">
+  </div>
+  <div class="nav-right">
+    <div id="user-chip">
+      <span>👤</span>
+      <span class="uname" id="uname-label"></span>
+      <button class="btn btn-ghost" style="padding:4px 12px;font-size:12px;" onclick="doLogout()">Out</button>
+    </div>
+    <div id="auth-btns" style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="openAuth('login')">Login</button>
+      <button class="btn btn-fill" onclick="openAuth('signup')">Sign Up</button>
+    </div>
+    <div class="cart-pill" onclick="openCart()">
+      🛍 Cart <span class="badge" id="cart-count">0</span>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-eyebrow">New Collection 2026</div>
+    <h1>Shop the things<br>you'll <em>love</em><br>every day.</h1>
+    <p>Curated essentials — from cutting-edge tech to artisan homeware. Every item chosen with intention, every price worth it.</p>
+    <div class="hero-actions">
+      <button class="btn btn-accent" onclick="document.querySelector('.catalogue').scrollIntoView({behavior:'smooth'})">Browse Catalogue</button>
+      <button class="btn btn-ghost" onclick="filterCat('New Arrivals', this)">New Arrivals →</button>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-card"><div class="stat-num">200+</div><div class="stat-label">Products</div></div>
+    <div class="stat-card"><div class="stat-num">48h</div><div class="stat-label">Fast Delivery</div></div>
+    <div class="stat-card"><div class="stat-num">4.9★</div><div class="stat-label">Avg Rating</div></div>
+  </div>
+</section>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <span class="filter-label">Shop by</span>
+  <button class="fchip active" onclick="filterCat('all',this)">All</button>
+  <button class="fchip" onclick="filterCat('Tech',this)">Tech</button>
+  <button class="fchip" onclick="filterCat('Home',this)">Home</button>
+  <button class="fchip" onclick="filterCat('Fashion',this)">Fashion</button>
+  <button class="fchip" onclick="filterCat('Beauty',this)">Beauty</button>
+  <button class="fchip" onclick="filterCat('Fitness',this)">Fitness</button>
+  <button class="fchip" onclick="filterCat('Food',this)">Food &amp; Drink</button>
+</div>
+
+<!-- CATALOGUE -->
+<section class="catalogue">
+  <div class="cat-header">
+    <div class="cat-title">Our Collection</div>
+    <div id="results-info"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="no-results" id="no-results">
+    <div class="big">🔍</div>
+    No products found. Try a different keyword or category.
+  </div>
+</section>
+
+<footer>
+  <div class="foot-logo">NO<span>V</span>A</div>
+  <span>© 2026 Nova Store. All rights reserved.</span>
+  <span>Free shipping over $75 · 30-day returns</span>
+</footer>
+
+<!-- CART DRAWER -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h2>Your Cart</h2>
+    <button class="x-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+  <div class="drawer-foot">
+    <div class="total-row">
+      <span class="total-label">Total</span>
+      <span class="total-val" id="cart-total">$0.00</span>
+    </div>
+    <button class="checkout-btn" id="checkout-btn" onclick="checkout()" disabled>Checkout</button>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-bg" id="auth-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <div class="modal-tabs">
+      <div class="mtab active" id="tab-login" onclick="switchTab('login')">Login</div>
+      <div class="mtab" id="tab-signup" onclick="switchTab('signup')">Sign Up</div>
+    </div>
+
+    <!-- Login -->
+    <div class="mform active" id="form-login">
+      <h3>Welcome back</h3>
+      <div class="sub">Sign in to your account</div>
+      <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="you@example.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+      <button class="msubmit" onclick="doLogin()">Sign In</button>
+      <div class="mmsg" id="l-msg"></div>
+    </div>
+
+    <!-- Signup -->
+    <div class="mform" id="form-signup">
+      <h3>Create account</h3>
+      <div class="sub">Join for a better experience</div>
+      <div class="field"><label>Full Name</label><input type="text" id="s-name" placeholder="Jane Doe"></div>
+      <div class="field"><label>Email</label><input type="email" id="s-email" placeholder="you@example.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="s-pass" placeholder="Min. 6 characters"></div>
+      <button class="msubmit" onclick="doSignup()">Create Account</button>
+      <div class="mmsg" id="s-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER CONFIRM -->
+<div class="confirm-modal" id="confirm-modal">
+  <div class="cbox">
+    <div class="icon">🎉</div>
+    <h2>Order Confirmed!</h2>
+    <p>Thanks for shopping with Nova. Your order has been received and is being prepared.</p>
+    <div class="oid" id="order-id"></div>
+    <button class="btn btn-accent" onclick="closeConfirm()">Continue Shopping</button>
+  </div>
+</div>
+
+<script>
+// ── PRODUCTS ─────────────────────────────────────────
+const PRODUCTS = [
+  {id:1, name:'Wireless Noise-Cancelling Headphones', cat:'Tech', price:149.99, emoji:'🎧', desc:'Deep bass, 40hr battery, foldable design.', tag:'Sale'},
+  {id:2, name:'Smart LED Desk Lamp', cat:'Tech', price:79.99, emoji:'💡', desc:'Touch dimming, USB-C charging port, warm/cool.', tag:''},
+  {id:3, name:'Minimalist Walnut Tray', cat:'Home', price:44.99, emoji:'🪵', desc:'Solid walnut, handcrafted, 30×12cm.', tag:'New'},
+  {id:4, name:'Scented Soy Candle', cat:'Home', price:32.99, emoji:'🕯️', desc:'Bergamot & cedar, 50hr burn, matte vessel.', tag:''},
+  {id:5, name:'Linen Tote Bag', cat:'Fashion', price:49.99, emoji:'👜', desc:'Natural linen, reinforced straps, roomy.', tag:'New'},
+  {id:6, name:'Classic White Sneakers', cat:'Fashion', price:94.99, emoji:'👟', desc:'Leather upper, cushioned sole, unisex fit.', tag:''},
+  {id:7, name:'Vitamin C Brightening Serum', cat:'Beauty', price:38.99, emoji:'✨', desc:'Niacinamide + Vit C, 30ml, all skin types.', tag:''},
+  {id:8, name:'Jade Facial Roller', cat:'Beauty', price:22.99, emoji:'💆', desc:'Reduces puffiness, boosts circulation.', tag:'Sale'},
+  {id:9, name:'Resistance Bands Set', cat:'Fitness', price:29.99, emoji:'🏋️', desc:'5 resistance levels, carry bag included.', tag:'New'},
+  {id:10, name:'Yoga Mat Pro', cat:'Fitness', price:68.99, emoji:'🧘', desc:'6mm thick, non-slip, alignment guides.', tag:''},
+  {id:11, name:'Organic Cold Brew Coffee', cat:'Food', price:19.99, emoji:'☕', desc:'Single-origin, 12-pack concentrate, 500ml.', tag:''},
+  {id:12, name:'Artisan Honey Trio', cat:'Food', price:44.99, emoji:'🍯', desc:'Wildflower, manuka & lavender — 250g each.', tag:'New'},
+  {id:13, name:'Portable Bluetooth Speaker', cat:'Tech', price:89.99, emoji:'🔊', desc:'360° sound, IPX7 waterproof, 24hr play.', tag:''},
+  {id:14, name:'Ceramic Pour-Over Set', cat:'Home', price:54.99, emoji:'🫖', desc:'Hand-thrown matte ceramic + dripper.', tag:''},
+  {id:15, name:'Merino Wool Beanie', cat:'Fashion', price:35.99, emoji:'🧣', desc:'100% merino, ribbed knit, 6 colours.', tag:''},
+  {id:16, name:'Rose Clay Face Mask', cat:'Beauty', price:26.99, emoji:'🌹', desc:'Deep cleanse, kaolin clay, all types.', tag:''},
+  {id:17, name:'Jump Rope Speed Cable', cat:'Fitness', price:18.99, emoji:'🪢', desc:'Adjustable steel cable, ball-bearing.', tag:'Sale'},
+  {id:18, name:'Herbal Tea Collection', cat:'Food', price:28.99, emoji:'🫖', desc:'12 varieties, biodegradable bags, 60 cups.', tag:''},
+];
+
+// ── STATE ─────────────────────────────────────────────
+let users = JSON.parse(localStorage.getItem('nova_users')||'{}');
+let currentUser = null;
+let cart = {};
+let activeCat = 'all';
+
+// ── RENDER ────────────────────────────────────────────
+function getFiltered() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  return PRODUCTS.filter(p => {
+    const catOk = activeCat === 'all' || p.cat === activeCat;
+    const qOk = !q || p.name.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q);
+    return catOk && qOk;
+  });
+}
+
+function renderGrid() {
+  const list = getFiltered();
+  const grid = document.getElementById('grid');
+  const noR = document.getElementById('no-results');
+  const info = document.getElementById('results-info');
+  grid.innerHTML = '';
+  if (!list.length) { noR.style.display='block'; info.textContent=''; return; }
+  noR.style.display='none';
+  info.textContent = list.length + ' products';
+  list.forEach(p => {
+    const inCart = !!cart[p.id];
+    grid.innerHTML += `
+    <div class="pcard">
+      <div class="pcard-img">
+        ${p.emoji}
+        ${p.tag ? `<span class="pcard-tag ${p.tag==='New'?'tag-new':'tag-sale'}">${p.tag}</span>` : ''}
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-cat">${p.cat}</div>
+        <div class="pcard-name">${p.name}</div>
+        <div class="pcard-desc">${p.desc}</div>
+        <div class="pcard-footer">
+          <span class="pcard-price">$${p.price.toFixed(2)}</span>
+          <button class="add-btn${inCart?' added':''}" id="ab-${p.id}" onclick="addToCart(${p.id})">
+            ${inCart ? '✓ Added' : '+ Add'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  });
+}
+
+function applyFilters() { renderGrid(); }
+
+function filterCat(cat, el) {
+  activeCat = cat;
+  document.querySelectorAll('.fchip').forEach(b => b.classList.remove('active'));
+  if (el && el.classList) el.classList.add('active');
+  renderGrid();
+}
+
+// ── CART ─────────────────────────────────────────────
+function addToCart(id) {
+  cart[id] = (cart[id]||0) + 1;
+  refreshCartUI();
+  const btn = document.getElementById('ab-'+id);
+  if (btn) { btn.textContent='✓ Added'; btn.classList.add('added'); }
+}
+function changeQty(id, d) {
+  cart[id] = (cart[id]||0) + d;
+  if (cart[id] <= 0) delete cart[id];
+  refreshCartUI();
+  const btn = document.getElementById('ab-'+id);
+  if (btn) { const has=!!cart[id]; btn.textContent=has?'✓ Added':'+ Add'; btn.classList.toggle('added',has); }
+}
+function removeFromCart(id) {
+  delete cart[id];
+  refreshCartUI();
+  const btn = document.getElementById('ab-'+id);
+  if (btn) { btn.textContent='+ Add'; btn.classList.remove('added'); }
+}
+
+function refreshCartUI() {
+  const total = Object.values(cart).reduce((a,b)=>a+b,0);
+  document.getElementById('cart-count').textContent = total;
+  renderDrawer();
+}
+
+function renderDrawer() {
+  const body = document.getElementById('drawer-body');
+  const entries = Object.entries(cart).filter(([,q])=>q>0);
+  if (!entries.length) {
+    body.innerHTML = `<div class="drawer-empty"><div class="ei">🛍</div><p>Your cart is empty.</p></div>`;
+    document.getElementById('cart-total').textContent = '$0.00';
+    document.getElementById('checkout-btn').disabled = true;
+    return;
+  }
+  document.getElementById('checkout-btn').disabled = false;
+  let html='', grand=0;
+  entries.forEach(([id,qty]) => {
+    const p = PRODUCTS.find(x=>x.id==id); if(!p) return;
+    const sub = p.price * qty; grand += sub;
+    html += `
+    <div class="ci">
+      <div class="ci-emoji">${p.emoji}</div>
+      <div class="ci-info">
+        <div class="ci-name">${p.name}</div>
+        <div class="ci-sub">$${sub.toFixed(2)}</div>
+        <div class="ci-qty">
+          <button class="qbtn" onclick="changeQty(${id},-1)">−</button>
+          <span class="qval">${qty}</span>
+          <button class="qbtn" onclick="changeQty(${id},1)">+</button>
+        </div>
+      </div>
+      <button class="del-btn" onclick="removeFromCart(${id})">✕</button>
+    </div>`;
+  });
+  body.innerHTML = html;
+  document.getElementById('cart-total').textContent = '$'+grand.toFixed(2);
+}
+
+function openCart() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+function closeCart() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+// ── CHECKOUT ─────────────────────────────────────────
+function checkout() {
+  const oid = 'NV-' + Date.now().toString(36).toUpperCase();
+  document.getElementById('order-id').textContent = 'Order ID: ' + oid;
+  document.getElementById('confirm-modal').classList.add('open');
+  cart = {};
+  refreshCartUI();
+  closeCart();
+  renderGrid();
+}
+function closeConfirm() { document.getElementById('confirm-modal').classList.remove('open'); }
+
+// ── AUTH ─────────────────────────────────────────────
+function openAuth(tab) {
+  document.getElementById('auth-modal').classList.add('open');
+  switchTab(tab);
+}
+function closeAuth() { document.getElementById('auth-modal').classList.remove('open'); }
+
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-signup').classList.toggle('active', tab==='signup');
+  document.getElementById('form-login').classList.toggle('active', tab==='login');
+  document.getElementById('form-signup').classList.toggle('active', tab==='signup');
+}
+
+function doLogin() {
+  const email = document.getElementById('l-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('l-pass').value;
+  const msg   = document.getElementById('l-msg');
+  if (!email||!pass) { msg.textContent='Please fill in all fields.'; msg.className='mmsg err'; return; }
+  const u = users[email];
+  if (!u||u.password!==pass) { msg.textContent='Invalid email or password.'; msg.className='mmsg err'; return; }
+  msg.textContent='✓ Signing you in…'; msg.className='mmsg ok';
+  setTimeout(() => { setUser(u); closeAuth(); }, 700);
+}
+
+function doSignup() {
+  const name  = document.getElementById('s-name').value.trim();
+  const email = document.getElementById('s-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('s-pass').value;
+  const msg   = document.getElementById('s-msg');
+  if (!name||!email||!pass) { msg.textContent='Please fill in all fields.'; msg.className='mmsg err'; return; }
+  if (!/\S+@\S+\.\S+/.test(email)) { msg.textContent='Invalid email address.'; msg.className='mmsg err'; return; }
+  if (pass.length<6) { msg.textContent='Password must be at least 6 characters.'; msg.className='mmsg err'; return; }
+  if (users[email]) { msg.textContent='Account already exists. Try logging in.'; msg.className='mmsg err'; return; }
+  users[email] = { name, password: pass };
+  localStorage.setItem('nova_users', JSON.stringify(users));
+  msg.textContent='✓ Account created! Signing you in…'; msg.className='mmsg ok';
+  setTimeout(() => { setUser(users[email]); closeAuth(); }, 800);
+}
+
+function setUser(u) {
+  currentUser = u;
+  document.getElementById('uname-label').textContent = u.name.split(' ')[0];
+  document.getElementById('user-chip').style.display = 'flex';
+  document.getElementById('auth-btns').style.display = 'none';
+}
+function doLogout() {
+  currentUser = null;
+  document.getElementById('user-chip').style.display = 'none';
+  document.getElementById('auth-btns').style.display = 'flex';
+}
+
+// ── INIT ─────────────────────────────────────────────
+renderGrid();
+</script>
+</body>
+</html>
