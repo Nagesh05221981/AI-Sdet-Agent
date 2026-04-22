@@ -14,31 +14,24 @@ Spec files MUST NOT contain cy.get(), cy.contains(), .click(), .type(),
 ALL element access and user interactions MUST live in the Page Object.
 Spec files contain ONLY: Page Object action method calls + .should() assertions.
 
-EXAMPLE — a signup spec:
+EXAMPLE PATTERN (generic — discover actual selectors from the DOM snapshot):
 
-  // SPEC FILE (user-signup.cy.js) — actions + assertions only
-  page.openSignupModal();
-  page.fillSignupForm(testData.fullName, testData.email, testData.password);
-  page.submitSignup();
-  page.signupMessage.should('not.be.empty');
-  page.fullNameField.should('have.value', testData.fullName);
+  // SPEC FILE — action method calls + assertions ONLY
+  page.openModal();
+  page.fillForm(testData.name, testData.email);
+  page.submitForm();
+  page.successMessage.should('not.be.empty');
+  page.nameField.should('have.value', testData.name);
 
-  // PAGE OBJECT (SignupPage.js) — all cy.get/click/type lives HERE
-  get signupButton() { return cy.get('#auth-btns').contains('Sign Up'); }
-  get fullNameField() { return cy.get('#s-name'); }
-  get signupMessage() { return cy.get('#s-msg'); }
-  openSignupModal() { this.signupButton.click(); }
-  fillSignupForm(name, email, pass) {
-    this.fullNameField.type(name);
-    cy.get('#s-email').type(email);
-    cy.get('#s-pass').type(pass);
+  // PAGE OBJECT — all cy.get/click/type lives HERE
+  get nameField() { return cy.get('<selector-from-DOM>'); }
+  get successMessage() { return cy.get('<selector-from-DOM>'); }
+  openModal() { cy.get('<selector-from-DOM>').click(); }
+  fillForm(name, email) {
+    this.nameField.type(name);
+    cy.get('<selector-from-DOM>').type(email);
   }
-  submitSignup() { cy.get('#form-signup').find('.msubmit').click(); }
-
-SIMILARLY for filter/browse — every .click() is a PO action method:
-
-  // SPEC: page.filterBy('Tech');
-  // PO:   filterBy(cat) { this.filterChips.contains(cat).click(); }
+  submitForm() { cy.get('<selector-from-DOM>').find('<submit-btn>').click(); }
 
 Test data (names, emails, passwords) MUST come from a fixture file loaded
 via cy.fixture() in a before() hook. Include the fixture in your output.
