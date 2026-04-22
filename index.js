@@ -7,6 +7,7 @@ import { testGeneratorAgent } from "./agents/test_generator.js";
 import { testFixerAgent } from "./agents/test_fixer.js";
 import { runCypress } from "./tools/cypress_runner.js";
 import { buildPageObjectIndexBlock } from "./tools/page_object_index.js";
+import { extractRelevantDom } from "./tools/dom_context_builder.js";
 
 // LangSmith / LangChain JS batches traces in the background. If the Node
 // process exits before the LangChainTracer's internal client posts its
@@ -42,13 +43,14 @@ const DOM_SNAPSHOT_PATH = "cypress/dom-snapshots/homepage.html";
 const TEST_CASES_DIR = "cypress/test-cases";
 const PAGES_DIR = "cypress/support/pages";
 const SPEC_GLOB = "cypress/e2e/**/*.cy.js";
-const DOM_TRUNCATE_CHARS = 8000;
+const DOM_TRUNCATE_CHARS = 15000;
 
 // --- Helpers ----------------------------------------------------------------
 function readDomSnapshotIfExists() {
   try {
-    const dom = fs.readFileSync(DOM_SNAPSHOT_PATH, "utf-8");
-    log("INIT", "DOM snapshot loaded", `${DOM_SNAPSHOT_PATH} (${dom.length} chars)`);
+    const raw = fs.readFileSync(DOM_SNAPSHOT_PATH, "utf-8");
+    const dom = extractRelevantDom(raw);
+    log("INIT", "DOM snapshot loaded", `${DOM_SNAPSHOT_PATH} (raw=${raw.length}, cleaned=${dom.length} chars)`);
     return dom;
   } catch (e) {
     if (e.code === "ENOENT") {
