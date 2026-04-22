@@ -1,6 +1,6 @@
 {
   "feature": "Browse Products",
-  "story": "User opens the Eclat shop and can see the product listing",
+  "story": "As a shopper, I want to land on the Eclat shop and immediately see the catalogue so I can decide what to buy.",
   "cases": [
     {
       "id": "TC-01",
@@ -17,10 +17,10 @@
     },
     {
       "id": "TC-02",
-      "title": "Product cards display correct information",
+      "title": "Each product card exposes name, category and price",
       "given": "Grid is rendered",
       "when": "user inspects the first .pcard",
-      "then": ".pcard-name, .pcard-cat, and .pcard-price are all visible and non-empty",
+      "then": ".pcard-name, .pcard-cat and .pcard-price are all visible and non-empty",
       "selectors_hint": [
         ".pcard",
         ".pcard-name",
@@ -28,6 +28,29 @@
         ".pcard-price"
       ],
       "priority": "medium"
+    },
+    {
+      "id": "TC-03",
+      "title": "Results info reflects visible product count",
+      "given": "Grid is rendered with products",
+      "when": "user checks the #results-info",
+      "then": "#results-info displays the correct count of visible products",
+      "selectors_hint": [
+        "#results-info"
+      ],
+      "priority": "medium"
+    },
+    {
+      "id": "TC-04",
+      "title": "Cart starts empty",
+      "given": "User opens /eclat-shop.html",
+      "when": "the page finishes rendering",
+      "then": "#cart-count shows 0 and #checkout-btn is disabled",
+      "selectors_hint": [
+        "#cart-count",
+        "#checkout-btn"
+      ],
+      "priority": "high"
     }
   ]
 }

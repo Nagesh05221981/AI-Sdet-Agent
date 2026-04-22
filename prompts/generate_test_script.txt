@@ -60,6 +60,13 @@ ARCHITECTURE RULES (MANDATORY)
 - Page Objects MUST NOT call cy.visit (or any other navigation primitive).
   Page Objects only model elements and actions that operate on an already-
   loaded page. Navigation is a test concern, not a page concern.
+- Page Object element accessors MUST use ES6 getter syntax, NOT regular methods:
+    CORRECT:   get grid() { return cy.get('#grid'); }
+    WRONG:     grid() { return cy.get('#grid'); }
+  Specs access getters as properties (no parentheses):
+    CORRECT:   page.grid.should('be.visible');
+    WRONG:     page.grid().should('be.visible');
+  Only use regular methods for actions that take parameters (e.g., search(term)).
 
 ================================================================================
 PAGE OBJECT REUSE (MANDATORY)
@@ -172,6 +179,9 @@ APP STATE / BEHAVIOUR (IMPORTANT)
   BEFORE cy.visit(). Prefer (a) for realism unless the test is specifically
   about login.
 - Cart state does NOT persist across page reloads (it is an in-memory object).
+- #results-info shows text like "18 products" (a count followed by "products").
+  Do NOT assume it contains the word "results". Assert with
+  .should('not.be.empty') or .invoke('text').should('match', /\d+ products/).
 - The checkout button is disabled while the cart is empty; assert disabled
   state before adding items if relevant.
 

@@ -7,7 +7,7 @@
       "title": "All filter chips are visible on load",
       "given": "User opens /eclat-shop.html",
       "when": "the page finishes rendering",
-      "then": "all filter chips (.fchip) are visible",
+      "then": "all .fchip elements are visible",
       "selectors_hint": [
         ".fchip"
       ],
@@ -15,8 +15,8 @@
     },
     {
       "id": "TC-02",
-      "title": "Clicking 'Tech' activates the filter",
-      "given": "All filter chips are visible",
+      "title": "Clicking 'Tech' activates the filter chip",
+      "given": "User sees all filter chips",
       "when": "user clicks on the 'Tech' .fchip",
       "then": "'Tech' .fchip gains the .active class",
       "selectors_hint": [
@@ -26,10 +26,10 @@
     },
     {
       "id": "TC-03",
-      "title": "Only 'Tech' products are visible after filtering",
+      "title": "Filtering by 'Tech' shows relevant products",
       "given": "User has activated the 'Tech' filter",
       "when": "the filter is applied",
-      "then": "only products whose .pcard-cat matches 'Tech' are visible and #results-info updates to reflect the new count",
+      "then": "only products with .pcard-cat matching 'Tech' are visible and #results-info updates to reflect the new count",
       "selectors_hint": [
         ".pcard",
         "#results-info"
@@ -39,11 +39,11 @@
     {
       "id": "TC-04",
       "title": "Clicking 'All' resets the filter",
-      "given": "User has filtered by 'Tech'",
+      "given": "User has filtered products by 'Tech'",
       "when": "user clicks on the 'All' .fchip",
-      "then": "the original products reappear and no .fchip is active",
+      "then": "all products are visible again and #results-info reflects the original count",
       "selectors_hint": [
-        ".fchip",
+        ".fchip.active",
         "#results-info"
       ],
       "priority": "high"

@@ -4,6 +4,7 @@ import path from "path";
 import { awaitAllCallbacks } from "@langchain/core/callbacks/promises";
 import { testDesignerAgent } from "./agents/test_designer.js";
 import { testGeneratorAgent } from "./agents/test_generator.js";
+import { testFixerAgent } from "./agents/test_fixer.js";
 import { runCypress } from "./tools/cypress_runner.js";
 import { buildPageObjectIndexBlock } from "./tools/page_object_index.js";
 
@@ -62,8 +63,12 @@ function writeGeneratedFiles(files) {
 function extractJson(raw) {
   // LLMs occasionally wrap JSON in ```json fences despite instructions.
   const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  const candidate = fence ? fence[1] : raw;
-  return JSON.parse(candidate.trim());
+  let candidate = (fence ? fence[1] : raw).trim();
+  // LLMs sometimes emit \' (backslash-escaped single quotes) which is invalid JSON.
+  candidate = candidate.replace(/\\'/g, "'");
+  // Strip trailing commas before } or ] (common LLM mistake).
+  candidate = candidate.replace(/,\s*([}\]])/g, "$1");
+  return JSON.parse(candidate);
 }
 
 function slugify(s) {
@@ -90,6 +95,123 @@ function classifyFailure(log) {
   if (/AssertionError/i.test(log)) return "assertion_issue";
   if (/SyntaxError|ReferenceError|TypeError/i.test(log)) return "spec_error";
   return "unknown";
+}
+
+// --- Fixer helpers ----------------------------------------------------------
+const INFRA_FAILURES = new Set(["server_unreachable", "baseurl_issue"]);
+const MAX_FIX_RETRIES = 3;
+
+function extractFailingSpecs(output) {
+  // Cypress marks failing specs with ✖ in the summary table.
+  const specs = [];
+  const re = /[✖✗×]\s+([\w.\-]+\.cy\.js)/g;
+  let m;
+  while ((m = re.exec(output)) !== null) specs.push(m[1]);
+
+  // Fallback: "Spec Ran:" line that shows after a single-spec failure
+  if (specs.length === 0) {
+    const specRan = /Spec\s+Ran:\s+([\w.\-]+\.cy\.js)/g;
+    while ((m = specRan.exec(output)) !== null) specs.push(m[1]);
+  }
+
+  return [...new Set(specs)].map((name) => `cypress/e2e/${name}`);
+}
+
+function findTestCasesForSpec(specPath, generated) {
+  for (const g of generated) {
+    if (g.specFiles.includes(specPath)) return g.cases;
+  }
+  return null;
+}
+
+async function fixAndRetry(generated, dom) {
+  for (let attempt = 1; attempt <= MAX_FIX_RETRIES; attempt++) {
+    console.log(`\n🔧 Fix attempt ${attempt}/${MAX_FIX_RETRIES}`);
+
+    const failureLog = fs.readFileSync("cypress-failure.log", "utf-8");
+    const failureType = classifyFailure(failureLog);
+
+    if (INFRA_FAILURES.has(failureType)) {
+      console.log(`⛔ Infrastructure failure (${failureType}) — cannot fix spec code.`);
+      return false;
+    }
+
+    let failingSpecPaths = extractFailingSpecs(failureLog);
+    if (failingSpecPaths.length === 0) {
+      // Conservative fallback: send all specs from this run
+      failingSpecPaths = generated.flatMap((g) => g.specFiles);
+      console.warn("⚠️  Could not identify failing spec(s); sending all specs to fixer.");
+    }
+
+    const poIndex = buildPageObjectIndexBlock(PAGES_DIR);
+    let anyFileWritten = false;
+
+    for (const specPath of failingSpecPaths) {
+      if (!fs.existsSync(specPath)) {
+        console.warn(`⚠️  Spec not found on disk: ${specPath}`);
+        continue;
+      }
+
+      const specSource = fs.readFileSync(specPath, "utf-8");
+      const testCases = findTestCasesForSpec(specPath, generated);
+
+      const userMsg = [
+        `FAILURE TYPE: ${failureType}`,
+        ``,
+        `FAILURE LOG:\n${failureLog}`,
+        ``,
+        `FAILING SPEC SOURCE (${specPath}):\n${specSource}`,
+        ``,
+        `ORIGINAL TEST CASES:\n${JSON.stringify(testCases, null, 2)}`,
+        ``,
+        poIndex,
+      ].join("\n");
+
+      const fullMsg = withDomBlock(userMsg, dom);
+
+      console.log(`🤖 Invoking fixer for ${specPath} (type: ${failureType})...`);
+      const result = await testFixerAgent.invoke({
+        messages: [{ role: "user", content: fullMsg }],
+      });
+
+      const raw = result.messages.at(-1).content;
+      console.log("\n===== FIXER RAW OUTPUT =====\n");
+      console.log(raw);
+
+      let parsed;
+      try {
+        parsed = extractJson(raw);
+      } catch (e) {
+        console.warn(`⚠️  Fixer output is not valid JSON: ${e.message}`);
+        continue;
+      }
+
+      if (parsed.files && Array.isArray(parsed.files) && parsed.files.length > 0) {
+        writeGeneratedFiles(parsed.files);
+        anyFileWritten = true;
+      } else if (parsed.reason) {
+        console.log(`ℹ️  Fixer declined: ${parsed.reason}`);
+      }
+    }
+
+    if (!anyFileWritten) {
+      console.warn("⚠️  Fixer produced no file changes. Aborting retry loop.");
+      return false;
+    }
+
+    console.log(`\n🚀 Re-running Cypress (attempt ${attempt})...\n`);
+    const { ok } = await runCypress([SPEC_GLOB]);
+
+    if (ok) {
+      console.log(`\n✅ Cypress passed after fix attempt ${attempt}`);
+      return true;
+    }
+
+    console.log(`\n❌ Cypress still failing after fix attempt ${attempt}`);
+  }
+
+  console.error(`\n💥 All ${MAX_FIX_RETRIES} fix attempts exhausted. Tests still failing.`);
+  return false;
 }
 
 // --- Story discovery --------------------------------------------------------
@@ -307,6 +429,32 @@ async function runAISDET() {
 
   console.log("📝 Wrote cypress-failure.log and cypress-failure-context.json");
   console.log("    Failure type:", context.type);
+
+  // Stage 4 — self-healing retry loop
+  console.log(`\n🔄 Stage 4 — entering self-healing fix loop`);
+  const fixed = await fixAndRetry(generated, dom);
+
+  if (!fixed) {
+    const finalLog = fs.existsSync("cypress-failure.log")
+      ? fs.readFileSync("cypress-failure.log", "utf-8")
+      : output;
+    const finalContext = {
+      ...context,
+      timestamp: new Date().toISOString(),
+      type: classifyFailure(finalLog),
+      fix_attempts: MAX_FIX_RETRIES,
+      fix_result: "exhausted",
+    };
+    fs.writeFileSync(
+      "cypress-failure-context.json",
+      JSON.stringify(finalContext, null, 2)
+    );
+    throw new Error(
+      `Self-healing failed after ${MAX_FIX_RETRIES} attempts. Type: ${finalContext.type}`
+    );
+  }
+
+  console.log("🎉 Pipeline completed — all tests passing after self-heal.");
 }
 
 runAISDET()
