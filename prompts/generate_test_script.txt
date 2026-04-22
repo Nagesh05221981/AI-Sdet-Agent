@@ -187,53 +187,14 @@ If no snapshot is provided, fall back to the catalogue below.
 ================================================================================
 SELECTOR RULES
 ================================================================================
-Use the stable selectors below in order of preference. The case's
-"selectors_hint" is a starting point, but you may add others from this
-catalogue if the case requires them.
-
-1. ID selectors for unique elements:
-   - Search input:              #search-input
-   - Cart trigger:              .cart-pill
-   - Cart badge (count):        #cart-count
-   - Cart drawer:               #drawer
-   - Cart drawer body:          #drawer-body
-   - Cart total:                #cart-total
-   - Checkout button:           #checkout-btn
-   - Order confirmation modal:  #confirm-modal
-   - Order id text:             #order-id
-   - Auth modal:                #auth-modal
-   - Auth tabs:                 #tab-login, #tab-signup
-   - Auth forms:                #form-login, #form-signup
-   - Login email / password:    #l-email, #l-pass
-   - Signup name/email/pass:    #s-name, #s-email, #s-pass
-   - Login/Signup submit btn:   form-specific .msubmit (scope inside the form)
-   - Login/Signup message:      #l-msg, #s-msg
-   - Auth trigger buttons:      #auth-btns (contains "Login" / "Sign Up")
-   - User chip after login:     #user-chip, #uname-label
-   - Results info text:         #results-info
-   - No-results state:          #no-results
-   - Products grid:             #grid
-
-2. Class + text for repeating elements:
-   - Filter chips:           .fchip     (text: All | Tech | Home | Fashion | Beauty | Fitness | Food & Drink)
-   - Active filter:          .fchip.active
-   - Product card:           .pcard
-   - Product name:           .pcard-name
-   - Product category:       .pcard-cat
-   - Product price:          .pcard-price
-   - Add to cart button:     .add-btn   (gains .added class once added)
-   - Cart item row:          .ci
-   - Cart item name:         .ci-name
-   - Cart item qty value:    .qval
-   - Qty +/- buttons:        .qbtn      (use cy.contains scoped inside .ci)
-   - Remove item button:     .del-btn
-   - Modal close (X):        .modal-close, .x-btn
-
-3. When a button is identified by its visible label, use cy.contains scoped to
-   a container:
-     cy.get('.hero-actions').contains('button', 'Browse Catalogue').click()
-
-Do NOT use brittle selectors like nth-child, XPath, or absolute DOM paths.
+- Discover selectors from the DOM snapshot provided in the user message.
+  The DOM snapshot is the source of truth — use only selectors that exist in it.
+- Prefer IDs (#id) for unique elements, classes (.class) for repeating elements.
+- Use cy.contains() scoped to a container when a button is identified by label.
+- Do NOT invent data-cy, data-test, or data-testid attributes.
+- Do NOT use brittle selectors like nth-child, XPath, or absolute DOM paths.
+- The test case's "selectors_hint" is a starting point — verify each hint
+  against the DOM snapshot before using it.
 
 ================================================================================
 APP STATE / BEHAVIOUR (IMPORTANT)
@@ -248,16 +209,10 @@ APP STATE / BEHAVIOUR (IMPORTANT)
   BEFORE cy.visit(). Prefer (a) for realism unless the test is specifically
   about login.
 - Cart state does NOT persist across page reloads (it is an in-memory object).
-- #form-login and #form-signup are <div> elements (class "mform"), NOT <form>
-  tags. Do NOT use cy.submit() on them. Instead click the .msubmit button
-  inside the form: cy.get('#form-signup').find('.msubmit').click()
-- Signup submit button text is exactly "Create Account" (capital A).
-  Login submit button text is exactly "Log In".
-  Use .find('.msubmit').click() rather than cy.contains() for submit buttons
-  to avoid case-sensitivity issues.
-- #results-info shows text like "18 products" (a count followed by "products").
-  Do NOT assume it contains the word "results". Assert with
-  .should('not.be.empty') or .invoke('text').should('match', /\d+ products/).
+- Do NOT use cy.submit() — form containers may be <div> not <form>.
+  Click the submit button directly instead.
+- When asserting text content, check the DOM snapshot for the actual text.
+  Use .should('not.be.empty') if you are unsure of the exact wording.
 - The checkout button is disabled while the cart is empty; assert disabled
   state before adding items if relevant.
 

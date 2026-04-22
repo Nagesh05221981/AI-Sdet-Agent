@@ -112,53 +112,13 @@ ARCHITECTURE RULES (MANDATORY)
   Only modify the failing test(s).
 
 ================================================================================
-SELECTOR CATALOGUE
+SELECTOR RULES
 ================================================================================
-Use these stable selectors in order of preference:
-
-1. ID selectors for unique elements:
-   - Search input:              #search-input
-   - Cart trigger:              .cart-pill
-   - Cart badge (count):        #cart-count
-   - Cart drawer:               #drawer
-   - Cart drawer body:          #drawer-body
-   - Cart total:                #cart-total
-   - Checkout button:           #checkout-btn
-   - Order confirmation modal:  #confirm-modal
-   - Order id text:             #order-id
-   - Auth modal:                #auth-modal
-   - Auth tabs:                 #tab-login, #tab-signup
-   - Auth forms:                #form-login, #form-signup
-   - Login email / password:    #l-email, #l-pass
-   - Signup name/email/pass:    #s-name, #s-email, #s-pass
-   - Login/Signup submit btn:   form-specific .msubmit (scope inside the form)
-   - Login/Signup message:      #l-msg, #s-msg
-   - Auth trigger buttons:      #auth-btns (contains "Login" / "Sign Up")
-   - User chip after login:     #user-chip, #uname-label
-   - Results info text:         #results-info
-   - No-results state:          #no-results
-   - Products grid:             #grid
-
-2. Class + text for repeating elements:
-   - Filter chips:           .fchip     (text: All | Tech | Home | Fashion | Beauty | Fitness | Food & Drink)
-   - Active filter:          .fchip.active
-   - Product card:           .pcard
-   - Product name:           .pcard-name
-   - Product category:       .pcard-cat
-   - Product price:          .pcard-price
-   - Add to cart button:     .add-btn   (gains .added class once added)
-   - Cart item row:          .ci
-   - Cart item name:         .ci-name
-   - Cart item qty value:    .qval
-   - Qty +/- buttons:        .qbtn      (use cy.contains scoped inside .ci)
-   - Remove item button:     .del-btn
-   - Modal close (X):        .modal-close, .x-btn
-
-3. When a button is identified by its visible label, use cy.contains scoped
-   to a container.
-
-Do NOT use brittle selectors like nth-child, XPath, or absolute DOM paths.
-Do NOT invent data-cy or data-test attributes that are absent from the DOM.
+- Discover and verify selectors from the DOM snapshot provided in the user message.
+- Prefer IDs (#id) for unique elements, classes (.class) for repeating elements.
+- Use cy.contains() scoped to a container when a button is identified by label.
+- Do NOT invent data-cy, data-test, or data-testid attributes.
+- Do NOT use brittle selectors like nth-child, XPath, or absolute DOM paths.
 
 ================================================================================
 DOM CONTEXT

@@ -53,39 +53,13 @@ section. When present:
 If no snapshot is provided, fall back to the catalogue below.
 
 ================================================================================
-SELECTOR CATALOGUE (use as hints)
+SELECTOR HINTS
 ================================================================================
-- Search input:              #search-input
-- Cart trigger:              .cart-pill
-- Cart badge (count):        #cart-count
-- Cart drawer:               #drawer
-- Cart drawer body:          #drawer-body
-- Cart total:                #cart-total
-- Checkout button:           #checkout-btn
-- Order confirmation modal:  #confirm-modal
-- Order id text:             #order-id
-- Auth modal:                #auth-modal
-- Auth tabs:                 #tab-login, #tab-signup
-- Auth forms:                #form-login, #form-signup
-- Login email / password:    #l-email, #l-pass
-- Signup name/email/pass:    #s-name, #s-email, #s-pass
-- Login/Signup messages:     #l-msg, #s-msg
-- Auth trigger area:         #auth-btns (contains "Login" / "Sign Up")
-- User chip after login:     #user-chip, #uname-label
-- Results info text:         #results-info
-- No-results state:          #no-results
-- Products grid:             #grid
-- Filter chips:              .fchip   (All | Tech | Home | Fashion | Beauty | Fitness | Food & Drink)
-- Active filter:             .fchip.active
-- Product card:              .pcard
-- Product name / category:   .pcard-name, .pcard-cat
-- Product price:             .pcard-price
-- Add to cart button:        .add-btn (gains .added once added)
-- Cart item row / name:      .ci, .ci-name
-- Cart item qty value:       .qval
-- Qty +/- buttons:           .qbtn (scope inside .ci)
-- Remove item button:        .del-btn
-- Modal close (X):           .modal-close, .x-btn
+- Discover selectors from the DOM snapshot provided in the user message.
+- Use only IDs and classes that actually exist in the DOM.
+- Do NOT invent data-cy, data-test, or data-testid attributes.
+- The "selectors_hint" field in your output should list selectors you verified
+  against the DOM snapshot.
 
 ================================================================================
 APP BEHAVIOUR (REMEMBER)
