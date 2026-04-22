@@ -43,7 +43,7 @@ const DOM_SNAPSHOT_PATH = "cypress/dom-snapshots/homepage.html";
 const TEST_CASES_DIR = "cypress/test-cases";
 const PAGES_DIR = "cypress/support/pages";
 const SPEC_GLOB = "cypress/e2e/**/*.cy.js";
-const DOM_TRUNCATE_CHARS = 15000;
+const DOM_TRUNCATE_CHARS = 20000;
 
 // --- Helpers ----------------------------------------------------------------
 function readDomSnapshotIfExists() {
