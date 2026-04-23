@@ -208,6 +208,17 @@ APP STATE / BEHAVIOUR (IMPORTANT)
 - To verify signup succeeded, prefer asserting on visible UI feedback
   (e.g., success message element becomes visible, or #user-chip appears)
   rather than checking localStorage directly.
+- Login tests that need an existing user MUST seed localStorage and THEN
+  reload the page so the app picks up the seeded data. The app reads
+  nova_users only on page load. Do this inside the it() block:
+    cy.window().then(w => {
+      w.localStorage.setItem('nova_users', JSON.stringify({
+        [testData.email]: { name: testData.name, password: testData.password }
+      }));
+    });
+    cy.visit('/eclat-shop.html');  // MUST revisit after seeding
+  The beforeEach cy.visit runs before the seed, so you MUST call cy.visit
+  again after seeding. Do NOT depend on a previous it() for test data.
 - Cart state does NOT persist across page reloads (it is an in-memory object).
 - Do NOT use cy.submit() — form containers may be <div> not <form>.
   Click the submit button directly instead.
