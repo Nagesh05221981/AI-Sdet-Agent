@@ -28,9 +28,10 @@ export function validateGeneratedFiles(files, dom) {
       errors.push(`Unsafe path: ${file.path} — must be under cypress/`);
     }
 
-    // Generator should NOT output Page Object or BaseTest files
-    if (file.path.startsWith("cypress/support/pages/") || file.path.includes("BaseTest")) {
-      errors.push(`${file.path} — generator must NOT create Page Objects or BaseTest (they are pre-built)`);
+    // Generator should NOT output Page Object, BaseTest, commands, or fixture files
+    if (file.path.startsWith("cypress/pages/") || file.path.includes("baseTest")
+        || file.path.includes("commands.js") || file.path === "cypress/fixtures/users.json") {
+      errors.push(`${file.path} — generator must NOT create Page Objects, BaseTest, commands, or users.json (they are pre-built)`);
     }
 
     // Spec file checks
@@ -150,7 +151,7 @@ function validateSpecPOAlignment(files, errors) {
   const specs = files.filter(f => f.path.endsWith(".cy.js"));
 
   // Read POs from disk (pre-built by Stage 0) instead of from output files
-  const poDir = "cypress/support/pages";
+  const poDir = "cypress/pages";
   const pos = [];
   if (fs.existsSync(poDir)) {
     for (const f of fs.readdirSync(poDir).filter(f => f.endsWith(".js"))) {
@@ -158,7 +159,7 @@ function validateSpecPOAlignment(files, errors) {
     }
   }
   // Also check BaseTest
-  const baseTestPath = "cypress/support/BaseTest.js";
+  const baseTestPath = "cypress/base/baseTest.js";
   if (fs.existsSync(baseTestPath)) {
     pos.push({ path: baseTestPath, content: fs.readFileSync(baseTestPath, "utf-8") });
   }

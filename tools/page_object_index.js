@@ -50,6 +50,10 @@ function extractMethods(source) {
   const reAccessor = /^\s*(?:get|set)\s+([a-zA-Z_][\w$]*)\s*\(/gm;
   while ((m = reAccessor.exec(source)) !== null) push(m[1]);
 
+  // 3. Elements object keys:  elementName: () => cy.get(...)
+  const reElement = /^\s*([a-zA-Z_][\w$]*)\s*:\s*(?:\([^)]*\)\s*=>|\(\)\s*=>)/gm;
+  while ((m = reElement.exec(source)) !== null) push(m[1]);
+
   return methods;
 }
 

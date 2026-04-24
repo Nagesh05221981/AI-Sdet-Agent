@@ -43,7 +43,7 @@ function flushLogTrail() {
 const STORIES_DIR = "stories";
 const DOM_SNAPSHOT_PATH = "cypress/dom-snapshots/homepage.html";
 const TEST_CASES_DIR = "cypress/test-cases";
-const PAGES_DIR = "cypress/support/pages";
+const PAGES_DIR = "cypress/pages";
 const SPEC_GLOB = "cypress/e2e/**/*.cy.js";
 const DOM_TRUNCATE_CHARS = 20000;
 
@@ -228,9 +228,23 @@ async function fixAndRetry(generated, dom) {
     }
 
     if (parsed.files && Array.isArray(parsed.files) && parsed.files.length > 0) {
-      log("STAGE-4", "Fixer output", `${parsed.files.length} file(s): ${parsed.files.map(f => f.path).join(", ")}`);
-      writeGeneratedFiles(parsed.files);
-      anyFileWritten = true;
+      // Block fixer from modifying infrastructure files
+      const PROTECTED = new Set([
+        "cypress/base/baseTest.js", "cypress/support/commands.js",
+        "cypress/support/e2e.js", "cypress/fixtures/users.json",
+      ]);
+      const safeFixes = parsed.files.filter(f => {
+        if (PROTECTED.has(f.path)) {
+          log("STAGE-4", "BLOCKED fixer from modifying", f.path);
+          return false;
+        }
+        return true;
+      });
+      if (safeFixes.length > 0) {
+        log("STAGE-4", "Fixer output", `${safeFixes.length} file(s): ${safeFixes.map(f => f.path).join(", ")}`);
+        writeGeneratedFiles(safeFixes);
+        anyFileWritten = true;
+      }
     } else if (parsed.reason) {
       log("STAGE-4", "Fixer declined", parsed.reason);
     }
@@ -321,7 +335,66 @@ function resolveStoriesToRun() {
   }));
 }
 
-// --- Stage 0: generate Page Objects + BaseTest from DOM --------------------
+// --- Infrastructure files (deterministic, not LLM-generated) ---------------
+function writeInfrastructureFiles() {
+  const files = [
+    {
+      path: "cypress/base/baseTest.js",
+      content: `import HomePage from "../pages/homePage"
+import LoginPage from "../pages/loginPage"
+import SignUpPage from "../pages/signUpPage"
+import FilterBars from "../pages/filterBars"
+import Catalogue from "../pages/catalogue"
+import Cart from "../pages/cartDrawer"
+
+export class BaseTest {
+    homePage = new HomePage()
+    loginPage = new LoginPage()
+    signUpPage = new SignUpPage()
+    filterBars = new FilterBars()
+    catalogue = new Catalogue()
+    cart = new Cart()
+    users = {}
+
+    constructor() {
+        before(() => {
+            cy.fixture('users').then((data) => {
+                this.users = data
+            })
+        })
+        beforeEach(() => {
+            cy.seedUser(this.users.validUser)
+            cy.visit('/eclat-shop.html')
+        })
+    }
+}
+`,
+    },
+    {
+      path: "cypress/fixtures/users.json",
+      content: JSON.stringify({
+        validUser: { email: "test@example.com", password: "password123", name: "Test" },
+        newUser: { email: "newuser@example.com", password: "password123", name: "New User" },
+      }, null, 4),
+    },
+  ];
+
+  // Write commands.js and e2e.js deterministically
+  files.push({
+    path: "cypress/support/commands.js",
+    content: `// Custom Cypress commands\n\nCypress.Commands.add('seedUser', (user) => {\n    if (!user) return\n    const users = JSON.parse(localStorage.getItem('nova_users')) || {}\n    users[user.email] = { name: user.name, password: user.password }\n    localStorage.setItem('nova_users', JSON.stringify(users))\n})\n\nCypress.Commands.add('captureDom', (name = 'homepage') => {\n    cy.document({ log: false }).then((doc) => {\n        cy.writeFile(\n            \`cypress/dom-snapshots/\${name}.html\`,\n            doc.documentElement.outerHTML,\n            { log: false }\n        )\n    })\n})\n`,
+  });
+
+  files.push({
+    path: "cypress/support/e2e.js",
+    content: `import './commands'\n\nafterEach(() => {\n    cy.window({ log: false }).then((win) => {\n        if (win && win.document) {\n            cy.captureDom('homepage')\n        }\n    })\n})\n`,
+  });
+
+  writeGeneratedFiles(files);
+  log("STAGE-0", "Infrastructure files written (baseTest.js, users.json, commands.js, e2e.js)");
+}
+
+// --- Stage 0: generate Page Objects from DOM -------------------------------
 async function generatePageObjects(dom) {
   if (!dom) {
     log("STAGE-0", "Skipping — no DOM snapshot available");
@@ -330,7 +403,7 @@ async function generatePageObjects(dom) {
 
   // Check if POs and BaseTest already exist
   const poDir = PAGES_DIR;
-  const baseTestPath = "cypress/support/BaseTest.js";
+  const baseTestPath = "cypress/base/baseTest.js";
   if (fs.existsSync(baseTestPath) && fs.existsSync(poDir)) {
     const poFiles = fs.readdirSync(poDir).filter(f => f.endsWith(".js"));
     if (poFiles.length > 0) {
@@ -340,9 +413,14 @@ async function generatePageObjects(dom) {
   }
 
   log("STAGE-0", "Generating Page Objects + BaseTest from DOM");
+
+  // Write infrastructure files deterministically (not LLM-generated)
+  writeInfrastructureFiles();
+
+  // LLM generates only the 6 Page Objects from DOM
   log("STAGE-0", "Invoking PO generator agent...");
 
-  const userMsg = `Generate Page Objects and BaseTest from this DOM snapshot.\n\n${dom}`;
+  const userMsg = `Generate Page Objects from this DOM snapshot.\n\n${dom}`;
 
   const result = await poGeneratorAgent.invoke({
     messages: [{ role: "user", content: userMsg }],
@@ -363,9 +441,14 @@ async function generatePageObjects(dom) {
     throw new Error("PO generator output missing files array");
   }
 
-  log("STAGE-0", "Files to write", `${parsed.files.length} file(s): ${parsed.files.map(f => f.path).join(", ")}`);
+  // Filter out any infrastructure files the LLM may have included anyway
+  parsed.files = parsed.files.filter(f =>
+    f.path.startsWith("cypress/pages/") && f.path.endsWith(".js")
+  );
+
+  log("STAGE-0", "PO files to write", `${parsed.files.length} file(s): ${parsed.files.map(f => f.path).join(", ")}`);
   writeGeneratedFiles(parsed.files);
-  log("STAGE-0", "Page Objects + BaseTest created");
+  log("STAGE-0", "Page Objects created");
 }
 
 // --- Stage 1: design test cases --------------------------------------------
