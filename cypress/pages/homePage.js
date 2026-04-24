@@ -1,40 +1,46 @@
 class HomePage {
     elements = {
-        logInButton: () => cy.get('#auth-btns').find('.btn-ghost'),
-        signUpButton: () => cy.get('#auth-btns').find('.btn-fill'),
+        loginButton: () => cy.get('.btn.btn-ghost').contains('Login'),
+        signupButton: () => cy.get('.btn.btn-fill').contains('Sign Up'),
         userChip: () => cy.get('#user-chip'),
-        userNameLabel: () => cy.get('#uname-label'),
-        logoutButton: () => cy.get('#user-chip').find('.btn-ghost'),
+        usernameLabel: () => cy.get('#uname-label'),
+        logoutButton: () => cy.get('#user-chip .btn.btn-ghost'),
         cartIcon: () => cy.get('.cart-pill'),
-        cartBadge: () => cy.get('#cart-count')
+        cartBadge: () => cy.get('#cart-count'),
+        searchInput: () => cy.get('#search-input')
     }
 
-    clickLogIn() {
-        this.elements.logInButton().should('be.visible').click()
+    clickLogin() {
+        this.elements.loginButton().should('be.visible').click()
     }
 
-    clickSignUp() {
-        this.elements.signUpButton().should('be.visible').click()
+    clickSignup() {
+        this.elements.signupButton().should('be.visible').click()
     }
 
-    openCart() {
-        this.elements.cartIcon().should('be.visible').click()
-    }
-
-    clickLogOut() {
+    clickLogout() {
         this.elements.logoutButton().should('be.visible').click()
     }
 
-    verifyUserChipAfterLogin(expectedName) {
-        this.elements.userNameLabel().should('contain.text', expectedName)
+    clickCartIcon() {
+        this.elements.cartIcon().should('be.visible').click()
     }
 
-    verifyLogout() {
-        this.elements.userChip().should('not.be.visible')
+    typeSearch(text) {
+        this.elements.searchInput().should('be.visible').clear().type(value)
+        this.elements.searchInput().should('be.visible').type(text)
     }
 
-    verifyCartCount(expectedCount) {
-        this.elements.cartBadge().should('contain.text', expectedCount)
+    verifyUserLoggedIn(username) {
+        cy.get('#uname-label').should('contain.text', username)
+    }
+
+    verifyCartCount(count) {
+        cy.get('#cart-count').should('have.text', count)
+    }
+
+    verifyUserLoggedOut() {
+        cy.get('#auth-btns').should('be.visible')
     }
 
 }

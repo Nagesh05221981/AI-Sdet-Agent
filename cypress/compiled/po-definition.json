@@ -6,16 +6,16 @@
       "file": "cypress/pages/homePage.js",
       "elements": [
         {
-          "name": "logInButton",
-          "get": "#auth-btns",
-          "find": ".btn-ghost",
+          "name": "loginButton",
+          "get": ".btn.btn-ghost",
+          "find": null,
           "contains": "Login",
           "param": false
         },
         {
-          "name": "signUpButton",
-          "get": "#auth-btns",
-          "find": ".btn-fill",
+          "name": "signupButton",
+          "get": ".btn.btn-fill",
+          "find": null,
           "contains": "Sign Up",
           "param": false
         },
@@ -27,7 +27,7 @@
           "param": false
         },
         {
-          "name": "userNameLabel",
+          "name": "usernameLabel",
           "get": "#uname-label",
           "find": null,
           "contains": null,
@@ -35,9 +35,9 @@
         },
         {
           "name": "logoutButton",
-          "get": "#user-chip",
-          "find": ".btn-ghost",
-          "contains": "Out",
+          "get": "#user-chip .btn.btn-ghost",
+          "find": null,
+          "contains": null,
           "param": false
         },
         {
@@ -53,34 +53,56 @@
           "find": null,
           "contains": null,
           "param": false
+        },
+        {
+          "name": "searchInput",
+          "get": "#search-input",
+          "find": null,
+          "contains": null,
+          "param": false
         }
       ],
       "actions": [
         {
-          "name": "clickLogIn",
+          "name": "clickLogin",
           "params": [],
+          "code": null,
           "steps": [
             {
-              "element": "logInButton",
+              "element": "loginButton",
               "do": "click",
               "value": null
             }
           ]
         },
         {
-          "name": "clickSignUp",
+          "name": "clickSignup",
           "params": [],
+          "code": null,
           "steps": [
             {
-              "element": "signUpButton",
+              "element": "signupButton",
               "do": "click",
               "value": null
             }
           ]
         },
         {
-          "name": "openCart",
+          "name": "clickLogout",
           "params": [],
+          "code": null,
+          "steps": [
+            {
+              "element": "logoutButton",
+              "do": "click",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "clickCartIcon",
+          "params": [],
+          "code": null,
           "steps": [
             {
               "element": "cartIcon",
@@ -90,54 +112,47 @@
           ]
         },
         {
-          "name": "clickLogOut",
-          "params": [],
+          "name": "typeSearch",
+          "params": [
+            "text"
+          ],
+          "code": null,
           "steps": [
             {
-              "element": "logoutButton",
-              "do": "click",
+              "element": "searchInput",
+              "do": "clear-type",
               "value": null
+            },
+            {
+              "element": "searchInput",
+              "do": "type",
+              "value": "text"
             }
           ]
         }
       ],
       "verifications": [
         {
-          "name": "verifyUserChipAfterLogin",
+          "name": "verifyUserLoggedIn",
           "params": [
-            "expectedName"
+            "username"
           ],
-          "steps": [
-            {
-              "element": "userNameLabel",
-              "assert": "contains.text",
-              "value": "expectedName"
-            }
-          ]
-        },
-        {
-          "name": "verifyLogout",
-          "params": [],
-          "steps": [
-            {
-              "element": "userChip",
-              "assert": "not.visible",
-              "value": null
-            }
-          ]
+          "code": "cy.get('#uname-label').should('contain.text', username)",
+          "steps": []
         },
         {
           "name": "verifyCartCount",
           "params": [
-            "expectedCount"
+            "count"
           ],
-          "steps": [
-            {
-              "element": "cartBadge",
-              "assert": "contains.text",
-              "value": "expectedCount"
-            }
-          ]
+          "code": "cy.get('#cart-count').should('have.text', count)",
+          "steps": []
+        },
+        {
+          "name": "verifyUserLoggedOut",
+          "params": [],
+          "code": "cy.get('#auth-btns').should('be.visible')",
+          "steps": []
         }
       ]
     },
@@ -168,14 +183,14 @@
           "param": false
         },
         {
-          "name": "signInButton",
-          "get": "#form-login",
-          "find": ".msubmit",
+          "name": "submitButton",
+          "get": "#form-login .msubmit",
+          "find": null,
           "contains": null,
           "param": false
         },
         {
-          "name": "loginStatus",
+          "name": "statusMessage",
           "get": "#l-msg",
           "find": null,
           "contains": null,
@@ -186,6 +201,7 @@
         {
           "name": "switchToLogin",
           "params": [],
+          "code": null,
           "steps": [
             {
               "element": "loginTab",
@@ -200,6 +216,7 @@
             "email",
             "password"
           ],
+          "code": null,
           "steps": [
             {
               "element": "loginTab",
@@ -209,15 +226,25 @@
             {
               "element": "emailInput",
               "do": "clear-type",
+              "value": null
+            },
+            {
+              "element": "emailInput",
+              "do": "type",
               "value": "email"
             },
             {
               "element": "passwordInput",
               "do": "clear-type",
+              "value": null
+            },
+            {
+              "element": "passwordInput",
+              "do": "type",
               "value": "password"
             },
             {
-              "element": "signInButton",
+              "element": "submitButton",
               "do": "click",
               "value": null
             }
@@ -226,31 +253,24 @@
       ],
       "verifications": [
         {
-          "name": "verifySigningInMessage",
-          "params": [],
-          "steps": [
-            {
-              "element": "loginStatus",
-              "assert": "not.be.empty",
-              "value": null
-            }
-          ]
-        },
-        {
           "name": "verifyLoginFormVisible",
           "params": [],
-          "steps": [
-            {
-              "element": "emailInput",
-              "assert": "visible",
-              "value": null
-            },
-            {
-              "element": "passwordInput",
-              "assert": "visible",
-              "value": null
-            }
-          ]
+          "code": "cy.get('#form-login').should('be.visible')",
+          "steps": []
+        },
+        {
+          "name": "verifySigningInMessage",
+          "params": [],
+          "code": "cy.get('#l-msg').should('contain.text', 'Signing in')",
+          "steps": []
+        },
+        {
+          "name": "verifyErrorMessage",
+          "params": [
+            "message"
+          ],
+          "code": "cy.get('#l-msg').should('contain.text', message)",
+          "steps": []
         }
       ]
     },
@@ -288,14 +308,14 @@
           "param": false
         },
         {
-          "name": "createAccountButton",
-          "get": "#form-signup",
-          "find": ".msubmit",
+          "name": "submitButton",
+          "get": "#form-signup .msubmit",
+          "find": null,
           "contains": null,
           "param": false
         },
         {
-          "name": "signupStatus",
+          "name": "statusMessage",
           "get": "#s-msg",
           "find": null,
           "contains": null,
@@ -306,6 +326,7 @@
         {
           "name": "switchToSignup",
           "params": [],
+          "code": null,
           "steps": [
             {
               "element": "signupTab",
@@ -321,6 +342,7 @@
             "email",
             "password"
           ],
+          "code": null,
           "steps": [
             {
               "element": "signupTab",
@@ -330,20 +352,35 @@
             {
               "element": "nameInput",
               "do": "clear-type",
+              "value": null
+            },
+            {
+              "element": "nameInput",
+              "do": "type",
               "value": "name"
             },
             {
               "element": "emailInput",
               "do": "clear-type",
+              "value": null
+            },
+            {
+              "element": "emailInput",
+              "do": "type",
               "value": "email"
             },
             {
               "element": "passwordInput",
               "do": "clear-type",
+              "value": null
+            },
+            {
+              "element": "passwordInput",
+              "do": "type",
               "value": "password"
             },
             {
-              "element": "createAccountButton",
+              "element": "submitButton",
               "do": "click",
               "value": null
             }
@@ -352,26 +389,24 @@
       ],
       "verifications": [
         {
-          "name": "verifySignupSuccessMessage",
-          "params": [],
-          "steps": [
-            {
-              "element": "signupStatus",
-              "assert": "visible",
-              "value": null
-            }
-          ]
-        },
-        {
           "name": "verifySignupFormVisible",
           "params": [],
-          "steps": [
-            {
-              "element": "nameInput",
-              "assert": "visible",
-              "value": null
-            }
-          ]
+          "code": "cy.get('#form-signup').should('be.visible')",
+          "steps": []
+        },
+        {
+          "name": "verifySuccessMessage",
+          "params": [],
+          "code": "cy.get('#s-msg').should('contain.text', 'Account created')",
+          "steps": []
+        },
+        {
+          "name": "verifyErrorMessage",
+          "params": [
+            "message"
+          ],
+          "code": "cy.get('#s-msg').should('contain.text', message)",
+          "steps": []
         }
       ]
     },
@@ -381,7 +416,7 @@
       "file": "cypress/pages/filterBars.js",
       "elements": [
         {
-          "name": "filtersBar",
+          "name": "filterBar",
           "get": ".filters-bar",
           "find": null,
           "contains": null,
@@ -401,39 +436,24 @@
           "params": [
             "category"
           ],
-          "steps": [
-            {
-              "element": "filterChip",
-              "do": "click",
-              "value": "category"
-            }
-          ]
+          "code": "cy.contains('.fchip', category).click()",
+          "steps": []
         }
       ],
       "verifications": [
         {
-          "name": "verifyFiltersBarVisible",
+          "name": "verifyFiltersVisible",
           "params": [],
-          "steps": [
-            {
-              "element": "filtersBar",
-              "assert": "visible",
-              "value": null
-            }
-          ]
+          "code": "cy.get('.filters-bar').should('be.visible')",
+          "steps": []
         },
         {
-          "name": "verifyFilterApplied",
+          "name": "verifyFilterActive",
           "params": [
             "category"
           ],
-          "steps": [
-            {
-              "element": "filterChip",
-              "assert": "has.class",
-              "value": "active"
-            }
-          ]
+          "code": "cy.contains('.fchip', category).should('have.class', 'active')",
+          "steps": []
         }
       ]
     },
@@ -450,11 +470,11 @@
           "param": false
         },
         {
-          "name": "productCards",
+          "name": "productCard",
           "get": ".pcard",
           "find": null,
           "contains": null,
-          "param": false
+          "param": true
         },
         {
           "name": "resultsInfo",
@@ -469,41 +489,6 @@
           "find": null,
           "contains": null,
           "param": false
-        },
-        {
-          "name": "firstCard",
-          "get": ".pcard:first",
-          "find": null,
-          "contains": null,
-          "param": false
-        },
-        {
-          "name": "productName",
-          "get": ".pcard-name",
-          "find": null,
-          "contains": null,
-          "param": false
-        },
-        {
-          "name": "productCategory",
-          "get": ".pcard-cat",
-          "find": null,
-          "contains": null,
-          "param": false
-        },
-        {
-          "name": "productPrice",
-          "get": ".pcard-price",
-          "find": null,
-          "contains": null,
-          "param": false
-        },
-        {
-          "name": "addToCartButton",
-          "get": ".add-btn",
-          "find": null,
-          "contains": null,
-          "param": false
         }
       ],
       "actions": [
@@ -512,53 +497,40 @@
           "params": [
             "productName"
           ],
-          "steps": [
-            {
-              "element": "productName",
-              "do": "click",
-              "value": "productName"
-            },
-            {
-              "element": "addToCartButton",
-              "do": "click",
-              "value": null
-            }
-          ]
+          "code": "cy.contains('.pcard', productName).find('.add-btn').should('be.visible').click()",
+          "steps": []
         }
       ],
       "verifications": [
         {
           "name": "verifyGridVisible",
           "params": [],
-          "steps": [
-            {
-              "element": "grid",
-              "assert": "visible",
-              "value": null
-            }
-          ]
+          "code": "cy.get('#grid').should('be.visible')",
+          "steps": []
         },
         {
-          "name": "verifyProductCardDetails",
-          "params": [],
-          "steps": [
-            {
-              "element": "productCards",
-              "assert": "visible",
-              "value": null
-            }
-          ]
+          "name": "verifyProductDetailsVisible",
+          "params": [
+            "productName"
+          ],
+          "code": "cy.contains('.pcard', productName).should('be.visible')",
+          "steps": []
         },
         {
           "name": "verifyResultsInfo",
-          "params": [],
-          "steps": [
-            {
-              "element": "resultsInfo",
-              "assert": "not.be.empty",
-              "value": null
-            }
-          ]
+          "params": [
+            "info"
+          ],
+          "code": "cy.get('#results-info').should('contain.text', info)",
+          "steps": []
+        },
+        {
+          "name": "verifyProductCount",
+          "params": [
+            "count"
+          ],
+          "code": "cy.get('.pcard').should('have.length', count)",
+          "steps": []
         }
       ]
     },
@@ -582,6 +554,41 @@
           "param": false
         },
         {
+          "name": "cartItem",
+          "get": ".ci",
+          "find": null,
+          "contains": null,
+          "param": true
+        },
+        {
+          "name": "cartItemName",
+          "get": ".ci-name",
+          "find": null,
+          "contains": null,
+          "param": true
+        },
+        {
+          "name": "quantityValue",
+          "get": ".qval",
+          "find": null,
+          "contains": null,
+          "param": true
+        },
+        {
+          "name": "quantityButton",
+          "get": ".qbtn",
+          "find": null,
+          "contains": null,
+          "param": true
+        },
+        {
+          "name": "deleteButton",
+          "get": ".del-btn",
+          "find": null,
+          "contains": null,
+          "param": true
+        },
+        {
           "name": "cartTotal",
           "get": "#cart-total",
           "find": null,
@@ -594,15 +601,73 @@
           "find": null,
           "contains": null,
           "param": false
+        },
+        {
+          "name": "orderConfirmationModal",
+          "get": "#confirm-modal",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "orderId",
+          "get": "#order-id",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "modalCloseButton",
+          "get": ".modal-close",
+          "find": null,
+          "contains": null,
+          "param": false
         }
       ],
       "actions": [
         {
           "name": "clickCheckout",
           "params": [],
+          "code": null,
           "steps": [
             {
               "element": "checkoutButton",
+              "do": "click",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "removeItem",
+          "params": [
+            "name"
+          ],
+          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.del-btn').click()",
+          "steps": []
+        },
+        {
+          "name": "increaseQty",
+          "params": [
+            "name"
+          ],
+          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qbtn').contains('+').click()",
+          "steps": []
+        },
+        {
+          "name": "decreaseQty",
+          "params": [
+            "name"
+          ],
+          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qbtn').contains('-').click()",
+          "steps": []
+        },
+        {
+          "name": "dismissOrderConfirmation",
+          "params": [],
+          "code": null,
+          "steps": [
+            {
+              "element": "modalCloseButton",
               "do": "click",
               "value": null
             }
@@ -613,24 +678,49 @@
         {
           "name": "verifyCartEmpty",
           "params": [],
-          "steps": [
-            {
-              "element": "drawerBody",
-              "assert": "empty",
-              "value": null
-            }
-          ]
+          "code": "cy.get('#drawer-body').should('be.empty')",
+          "steps": []
+        },
+        {
+          "name": "verifyCartItemPresent",
+          "params": [
+            "name"
+          ],
+          "code": "cy.get('#drawer-body').contains('.ci-name', name).should('be.visible')",
+          "steps": []
+        },
+        {
+          "name": "verifyCartItemQuantity",
+          "params": [
+            "name",
+            "quantity"
+          ],
+          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qval').should('have.text', quantity)",
+          "steps": []
         },
         {
           "name": "verifyCheckoutDisabled",
           "params": [],
-          "steps": [
-            {
-              "element": "checkoutButton",
-              "assert": "disabled",
-              "value": null
-            }
-          ]
+          "code": "cy.get('#checkout-btn').should('be.disabled')",
+          "steps": []
+        },
+        {
+          "name": "verifyCheckoutEnabled",
+          "params": [],
+          "code": "cy.get('#checkout-btn').should('not.be.disabled')",
+          "steps": []
+        },
+        {
+          "name": "verifyOrderConfirmationVisible",
+          "params": [],
+          "code": "cy.get('#confirm-modal').should('be.visible')",
+          "steps": []
+        },
+        {
+          "name": "verifyOrderIdVisible",
+          "params": [],
+          "code": "cy.get('#order-id').should('be.visible')",
+          "steps": []
         }
       ]
     }

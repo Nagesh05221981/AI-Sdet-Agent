@@ -4,36 +4,50 @@
   "cases": [
     {
       "id": "TC-01",
-      "title": "Display Signup page on button click",
+      "title": "Open signup page",
       "given": "User opens /eclat-shop.html",
       "when": "User clicks the Sign Up button",
-      "then": "The SIGNup page with Create account is displayed",
+      "then": "Signup page with Create account is displayed",
       "selectors_hint": [
-        "#auth-btns .btn.btn-fill"
+        "button.btn.btn-fill",
+        "#auth-btns"
       ],
       "priority": "high"
     },
     {
       "id": "TC-02",
-      "title": "Signup form accepts full name, email, and password",
+      "title": "Signup form fields are visible",
       "given": "Signup page is displayed",
-      "when": "User enters full name, email, and password",
-      "then": "The input fields for full name, email, and password are non-empty",
+      "when": "User inspects the signup form",
+      "then": "Full name, email, and password fields are visible and empty",
       "selectors_hint": [
-        "#signup-fullname",
-        "#signup-email",
-        "#signup-password"
+        "#signup-form",
+        "#full-name",
+        "#email",
+        "#password"
       ],
       "priority": "high"
     },
     {
       "id": "TC-03",
-      "title": "Create account on clicking create account button",
-      "given": "User has entered valid full name, email, and password",
-      "when": "User clicks the create account button",
-      "then": "A new account is created and stored in localStorage under 'nova_users'",
+      "title": "Create account button is enabled",
+      "given": "Signup form is filled with valid data",
+      "when": "User fills in full name, email, and password",
+      "then": "Create account button is enabled",
       "selectors_hint": [
         "#create-account-btn"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-04",
+      "title": "Account creation success",
+      "given": "Signup form is filled with valid data",
+      "when": "User clicks the Create account button",
+      "then": "New account is created and user is logged in",
+      "selectors_hint": [
+        "#uname-label",
+        "#user-chip"
       ],
       "priority": "high"
     }

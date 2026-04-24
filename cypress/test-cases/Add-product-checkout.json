@@ -1,0 +1,67 @@
+{
+  "feature": "Product Selection and Checkout",
+  "story": "As a product owner I would like the user to be able to select a product add it to the cart and checkout",
+  "cases": [
+    {
+      "id": "TC-01",
+      "title": "Add product to cart",
+      "given": "User opens /eclat-shop.html",
+      "when": "User clicks the add button on a product card",
+      "then": "The cart count increases by 1",
+      "selectors_hint": [
+        ".add-btn",
+        "#cart-count"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-02",
+      "title": "Verify product in cart",
+      "given": "User has added a product to the cart",
+      "when": "User opens the cart",
+      "then": "The cart modal displays the added product with correct name, quantity, and price",
+      "selectors_hint": [
+        ".cart-pill",
+        ".cart-item-name",
+        ".cart-item-qty",
+        ".cart-item-price"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-03",
+      "title": "Checkout button enabled",
+      "given": "User has at least one product in the cart",
+      "when": "User views the cart",
+      "then": "The checkout button is enabled",
+      "selectors_hint": [
+        ".checkout-btn"
+      ],
+      "priority": "medium"
+    },
+    {
+      "id": "TC-04",
+      "title": "Complete checkout process",
+      "given": "User has products in the cart",
+      "when": "User clicks the checkout button",
+      "then": "An order confirmation message is displayed",
+      "selectors_hint": [
+        ".checkout-btn",
+        ".order-confirmation"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-05",
+      "title": "Dismiss order confirmation",
+      "given": "Order confirmation is displayed",
+      "when": "User clicks continue shopping",
+      "then": "The order confirmation is dismissed and the user returns to the product catalogue",
+      "selectors_hint": [
+        ".continue-shopping-btn",
+        ".catalogue"
+      ],
+      "priority": "medium"
+    }
+  ]
+}

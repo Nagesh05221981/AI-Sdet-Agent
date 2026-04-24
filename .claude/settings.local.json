@@ -14,7 +14,8 @@
       "WebSearch",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d['pages'][4]['verifications'][0], indent=2\\)\\)\")",
       "Bash(python3 -c ':*)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(xxd stories/Add-product-checkout.md)"
     ]
   }
 }

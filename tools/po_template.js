@@ -156,6 +156,22 @@ function buildVerifyMethod(name, verify, pageElements) {
 }
 
 /**
+ * Generate a method using raw code (escape hatch for complex DOM traversal).
+ */
+function buildCodeMethod(name, method) {
+  const params = method.params ? method.params.join(", ") : "";
+  const lines = [];
+  lines.push(`    ${name}(${params}) {`);
+  // Split code into lines and indent
+  const codeLines = method.code.split("\n").map(l => l.trim()).filter(l => l);
+  for (const cl of codeLines) {
+    lines.push(`        ${cl}`);
+  }
+  lines.push(`    }`);
+  return lines.join("\n");
+}
+
+/**
  * Generate a complete Page Object .js file from a page definition.
  */
 function generatePageObjectCode(page) {
@@ -173,13 +189,21 @@ function generatePageObjectCode(page) {
 
   // Action methods (from array)
   for (const action of page.actions) {
-    lines.push(buildActionMethod(action.name, action, page.elements));
+    if (action.code) {
+      lines.push(buildCodeMethod(action.name, action));
+    } else {
+      lines.push(buildActionMethod(action.name, action, page.elements));
+    }
     lines.push("");
   }
 
   // Verification methods (from array)
   for (const verify of page.verifications) {
-    lines.push(buildVerifyMethod(verify.name, verify, page.elements));
+    if (verify.code) {
+      lines.push(buildCodeMethod(verify.name, verify));
+    } else {
+      lines.push(buildVerifyMethod(verify.name, verify, page.elements));
+    }
     lines.push("");
   }
 

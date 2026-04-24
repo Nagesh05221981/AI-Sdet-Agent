@@ -38,6 +38,7 @@ export const PO_DEFINITION_SCHEMA = {
                 properties: {
                   name: { type: "string", description: "Method name e.g. clickLogIn" },
                   params: { type: "array", items: { type: "string" } },
+                  code: { type: ["string", "null"], description: "Raw Cypress code for complex scoped actions. If not null, steps are ignored." },
                   steps: {
                     type: "array",
                     items: {
@@ -52,7 +53,7 @@ export const PO_DEFINITION_SCHEMA = {
                     },
                   },
                 },
-                required: ["name", "params", "steps"],
+                required: ["name", "params", "code", "steps"],
                 additionalProperties: false,
               },
             },
@@ -63,6 +64,7 @@ export const PO_DEFINITION_SCHEMA = {
                 properties: {
                   name: { type: "string", description: "Method name e.g. verifyGridVisible" },
                   params: { type: "array", items: { type: "string" } },
+                  code: { type: ["string", "null"], description: "Raw Cypress code for complex verifications. If not null, steps are ignored." },
                   steps: {
                     type: "array",
                     items: {
@@ -77,7 +79,7 @@ export const PO_DEFINITION_SCHEMA = {
                     },
                   },
                 },
-                required: ["name", "params", "steps"],
+                required: ["name", "params", "code", "steps"],
                 additionalProperties: false,
               },
             },

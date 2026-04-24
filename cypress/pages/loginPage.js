@@ -3,8 +3,8 @@ class LoginPage {
         loginTab: () => cy.get('#tab-login'),
         emailInput: () => cy.get('#l-email'),
         passwordInput: () => cy.get('#l-pass'),
-        signInButton: () => cy.get('#form-login').find('.msubmit'),
-        loginStatus: () => cy.get('#l-msg')
+        submitButton: () => cy.get('#form-login .msubmit'),
+        statusMessage: () => cy.get('#l-msg')
     }
 
     switchToLogin() {
@@ -13,18 +13,23 @@ class LoginPage {
 
     login(email, password) {
         this.elements.loginTab().should('be.visible').click()
-        this.elements.emailInput().should('be.visible').clear().type(email)
-        this.elements.passwordInput().should('be.visible').clear().type(password)
-        this.elements.signInButton().should('be.visible').click()
-    }
-
-    verifySigningInMessage() {
-        this.elements.loginStatus().should('not.be.empty')
+        this.elements.emailInput().should('be.visible').clear().type(value)
+        this.elements.emailInput().should('be.visible').type(email)
+        this.elements.passwordInput().should('be.visible').clear().type(value)
+        this.elements.passwordInput().should('be.visible').type(password)
+        this.elements.submitButton().should('be.visible').click()
     }
 
     verifyLoginFormVisible() {
-        this.elements.emailInput().should('be.visible')
-        this.elements.passwordInput().should('be.visible')
+        cy.get('#form-login').should('be.visible')
+    }
+
+    verifySigningInMessage() {
+        cy.get('#l-msg').should('contain.text', 'Signing in')
+    }
+
+    verifyErrorMessage(message) {
+        cy.get('#l-msg').should('contain.text', message)
     }
 
 }

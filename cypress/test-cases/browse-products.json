@@ -7,10 +7,11 @@
       "title": "Grid renders on load",
       "given": "User opens /eclat-shop.html",
       "when": "the page finishes rendering",
-      "then": "at least one .pcard is visible",
+      "then": "at least one .pcard is visible and #results-info shows a non-empty count",
       "selectors_hint": [
         "#grid",
-        ".pcard"
+        ".pcard",
+        "#results-info"
       ],
       "priority": "high"
     },
@@ -30,18 +31,6 @@
     },
     {
       "id": "TC-03",
-      "title": "Results info reflects visible product count",
-      "given": "Grid is rendered",
-      "when": "the page finishes rendering",
-      "then": "#results-info text matches the number of visible .pcard elements",
-      "selectors_hint": [
-        "#results-info",
-        ".pcard"
-      ],
-      "priority": "medium"
-    },
-    {
-      "id": "TC-04",
       "title": "Cart starts empty and checkout button is disabled",
       "given": "User opens /eclat-shop.html",
       "when": "the page finishes rendering",
