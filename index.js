@@ -9,6 +9,7 @@ import { extractRelevantDom } from "./tools/dom_context_builder.js";
 import { PO_DEFINITION_SCHEMA, SPEC_DEFINITION_SCHEMA } from "./tools/schemas.js";
 import { compilePODefinition, buildPOCatalog } from "./tools/po_template.js";
 import { compileSpecDefinition, validateSpecAgainstCatalog } from "./tools/spec_template.js";
+import { healLocators } from "./tools/locator_healer.js";
 
 // --- LangSmith flush --------------------------------------------------------
 async function flushLangSmith() {
@@ -91,8 +92,8 @@ function slugify(s) {
 function classifyFailure(log) {
   if (!log) return "unknown";
   if (/could not verify that this server is running/i.test(log) || /ECONNREFUSED/i.test(log)) return "server_unreachable";
-  if (/Timed out retrying/i.test(log)) return "timeout_issue";
   if (/Expected to find element/i.test(log)) return "selector_issue";
+  if (/Timed out retrying/i.test(log)) return "timeout_issue";
   if (/cy\.visit.*failed/i.test(log)) return "baseurl_issue";
   if (/AssertionError/i.test(log)) return "assertion_issue";
   if (/SyntaxError|ReferenceError|TypeError/i.test(log)) return "spec_error";
@@ -342,6 +343,23 @@ async function fixAndRetry(pages, dom) {
     if (INFRA_FAILURES.has(failureType)) {
       log("STAGE-4", "BAIL — infrastructure failure", failureType);
       return false;
+    }
+
+    // Try locator healing for selector issues or timeouts caused by missing elements
+    const hasElementNotFound = /Expected to find element/i.test(failureLog);
+    if (failureType === "selector_issue" || (failureType === "timeout_issue" && hasElementNotFound)) {
+      log("STAGE-4", "Selector issue detected — attempting locator healing");
+      const { healed } = await healLocators(structuredLLM, failureLog, dom, log);
+      if (healed) {
+        log("STAGE-4", "Locators healed — re-running Cypress");
+        const failingSpecs = extractFailingSpecs(failureLog);
+        const { ok } = await runCypress(failingSpecs.length > 0 ? failingSpecs : [SPEC_GLOB]);
+        if (ok) {
+          log("STAGE-4", "Cypress PASSED after locator healing");
+          return true;
+        }
+        log("STAGE-4", "Still failing after locator healing — continuing with spec fixer");
+      }
     }
 
     let failingSpecPaths = extractFailingSpecs(failureLog);
