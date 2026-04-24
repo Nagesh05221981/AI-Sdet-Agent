@@ -2,6 +2,8 @@
 // Validates LLM-generated files before Cypress execution.
 // All checks are deterministic (no LLM calls).
 
+import fs from "fs";
+
 /**
  * Validate generated files against rules and DOM snapshot.
  * Returns { valid: boolean, errors: string[] }
@@ -24,6 +26,11 @@ export function validateGeneratedFiles(files, dom) {
     // Path safety: only allow cypress/ and nothing outside
     if (!file.path.startsWith("cypress/")) {
       errors.push(`Unsafe path: ${file.path} — must be under cypress/`);
+    }
+
+    // Generator should NOT output Page Object or BaseTest files
+    if (file.path.startsWith("cypress/support/pages/") || file.path.includes("BaseTest")) {
+      errors.push(`${file.path} — generator must NOT create Page Objects or BaseTest (they are pre-built)`);
     }
 
     // Spec file checks
@@ -141,7 +148,20 @@ function validateSelectors(file, dom, errors) {
 
 function validateSpecPOAlignment(files, errors) {
   const specs = files.filter(f => f.path.endsWith(".cy.js"));
-  const pos = files.filter(f => f.path.startsWith("cypress/support/pages/") && f.path.endsWith(".js"));
+
+  // Read POs from disk (pre-built by Stage 0) instead of from output files
+  const poDir = "cypress/support/pages";
+  const pos = [];
+  if (fs.existsSync(poDir)) {
+    for (const f of fs.readdirSync(poDir).filter(f => f.endsWith(".js"))) {
+      pos.push({ path: `${poDir}/${f}`, content: fs.readFileSync(`${poDir}/${f}`, "utf-8") });
+    }
+  }
+  // Also check BaseTest
+  const baseTestPath = "cypress/support/BaseTest.js";
+  if (fs.existsSync(baseTestPath)) {
+    pos.push({ path: baseTestPath, content: fs.readFileSync(baseTestPath, "utf-8") });
+  }
 
   for (const spec of specs) {
     // Find PO method calls: page.someMethod() or page.someGetter.

@@ -5,6 +5,7 @@ import { awaitAllCallbacks } from "@langchain/core/callbacks/promises";
 import { testDesignerAgent } from "./agents/test_designer.js";
 import { testGeneratorAgent } from "./agents/test_generator.js";
 import { testFixerAgent } from "./agents/test_fixer.js";
+import { poGeneratorAgent } from "./agents/po_generator.js";
 import { runCypress } from "./tools/cypress_runner.js";
 import { buildPageObjectIndexBlock } from "./tools/page_object_index.js";
 import { extractRelevantDom } from "./tools/dom_context_builder.js";
@@ -320,6 +321,53 @@ function resolveStoriesToRun() {
   }));
 }
 
+// --- Stage 0: generate Page Objects + BaseTest from DOM --------------------
+async function generatePageObjects(dom) {
+  if (!dom) {
+    log("STAGE-0", "Skipping — no DOM snapshot available");
+    return;
+  }
+
+  // Check if POs and BaseTest already exist
+  const poDir = PAGES_DIR;
+  const baseTestPath = "cypress/support/BaseTest.js";
+  if (fs.existsSync(baseTestPath) && fs.existsSync(poDir)) {
+    const poFiles = fs.readdirSync(poDir).filter(f => f.endsWith(".js"));
+    if (poFiles.length > 0) {
+      log("STAGE-0", "Page Objects + BaseTest already exist", `${poFiles.length} PO(s), skipping generation`);
+      return;
+    }
+  }
+
+  log("STAGE-0", "Generating Page Objects + BaseTest from DOM");
+  log("STAGE-0", "Invoking PO generator agent...");
+
+  const userMsg = `Generate Page Objects and BaseTest from this DOM snapshot.\n\n${dom}`;
+
+  const result = await poGeneratorAgent.invoke({
+    messages: [{ role: "user", content: userMsg }],
+  });
+
+  const raw = result.messages.at(-1).content;
+  log("STAGE-0", "PO generator responded", `${raw.length} chars`);
+
+  let parsed;
+  try {
+    parsed = extractJson(raw);
+  } catch (e) {
+    log("STAGE-0", "JSON parse FAILED", e.message);
+    throw new Error("PO generator output is not valid JSON: " + e.message);
+  }
+
+  if (!parsed.files || !Array.isArray(parsed.files)) {
+    throw new Error("PO generator output missing files array");
+  }
+
+  log("STAGE-0", "Files to write", `${parsed.files.length} file(s): ${parsed.files.map(f => f.path).join(", ")}`);
+  writeGeneratedFiles(parsed.files);
+  log("STAGE-0", "Page Objects + BaseTest created");
+}
+
 // --- Stage 1: design test cases --------------------------------------------
 async function designTestCases(slug, story, dom) {
   log("STAGE-1", "Designing test cases", `slug=${slug}`);
@@ -480,8 +528,10 @@ async function runAISDET() {
 
   const dom = readDomSnapshotIfExists();
 
-  // Stage 1+2 for each story, sequentially so the PO index seen by story N+1
-  // already reflects POs created by story N.
+  // Stage 0 — generate Page Objects + BaseTest from DOM (one-time)
+  await generatePageObjects(dom);
+
+  // Stage 1+2 for each story, sequentially.
   const generated = [];
   for (const story of stories) {
     try {
