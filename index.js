@@ -8,6 +8,7 @@ import { testFixerAgent } from "./agents/test_fixer.js";
 import { runCypress } from "./tools/cypress_runner.js";
 import { buildPageObjectIndexBlock } from "./tools/page_object_index.js";
 import { extractRelevantDom } from "./tools/dom_context_builder.js";
+import { validateGeneratedFiles } from "./tools/validator.js";
 
 // LangSmith / LangChain JS batches traces in the background. If the Node
 // process exits before the LangChainTracer's internal client posts its
@@ -81,11 +82,19 @@ function extractJson(raw) {
   // LLMs occasionally wrap JSON in ```json fences despite instructions.
   const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
   let candidate = (fence ? fence[1] : raw).trim();
-  // LLMs sometimes emit \' (backslash-escaped single quotes) which is invalid JSON.
-  candidate = candidate.replace(/\\'/g, "'");
   // Strip trailing commas before } or ] (common LLM mistake).
   candidate = candidate.replace(/,\s*([}\]])/g, "$1");
-  return JSON.parse(candidate);
+  // Fix invalid escape sequences LLMs produce inside JSON strings.
+  // Valid JSON escapes: \" \\ \/ \b \f \n \r \t \uXXXX
+  // Everything else (like \' \` \: \. \- etc.) is invalid — remove the backslash.
+  candidate = candidate.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
+  try {
+    return JSON.parse(candidate);
+  } catch (firstErr) {
+    // Second attempt: strip all non-standard backslash escapes entirely
+    const relaxed = candidate.replace(/\\(?!["\\/bfnrtu])/g, "");
+    return JSON.parse(relaxed);
+  }
 }
 
 function slugify(s) {
@@ -389,6 +398,56 @@ async function generateCypressFiles(slug, cases, dom) {
   }
 
   log("STAGE-2", "Files to write", `${parsed.files.length} file(s): ${parsed.files.map(f => f.path).join(", ")}`);
+
+  // Stage 2.5 — validate before writing
+  const validation = validateGeneratedFiles(parsed.files, dom);
+  if (!validation.valid) {
+    log("VALIDATE", "Validation FAILED", `${validation.errors.length} error(s)`);
+    for (const err of validation.errors) {
+      log("VALIDATE", "  " + err);
+    }
+
+    // Retry: send validation errors back to the generator for one more attempt
+    log("VALIDATE", "Retrying generator with validation feedback...");
+    const retryMsg = withDomBlock(
+      `Story slug (use as the spec filename): ${slug}\n\n` +
+        `Test cases:\n${JSON.stringify(cases, null, 2)}\n\n` +
+        `${poIndex}\n\n` +
+        `VALIDATION ERRORS FROM PREVIOUS ATTEMPT (fix these):\n` +
+        validation.errors.map(e => `- ${e}`).join("\n"),
+      dom
+    );
+
+    const retryResult = await testGeneratorAgent.invoke({
+      messages: [{ role: "user", content: retryMsg }],
+    });
+    const retryRaw = retryResult.messages.at(-1).content;
+    log("VALIDATE", "Retry generator responded", `${retryRaw.length} chars`);
+
+    let retryParsed;
+    try {
+      retryParsed = extractJson(retryRaw);
+    } catch (e) {
+      log("VALIDATE", "Retry JSON parse FAILED", e.message);
+      throw new Error("Generator retry output is not valid JSON: " + e.message);
+    }
+
+    if (retryParsed.files && Array.isArray(retryParsed.files)) {
+      const retryValidation = validateGeneratedFiles(retryParsed.files, dom);
+      if (!retryValidation.valid) {
+        log("VALIDATE", "Retry still has errors — proceeding anyway", `${retryValidation.errors.length} error(s)`);
+        for (const err of retryValidation.errors) {
+          log("VALIDATE", "  " + err);
+        }
+      } else {
+        log("VALIDATE", "Retry PASSED validation");
+      }
+      parsed = retryParsed;
+    }
+  } else {
+    log("VALIDATE", "Validation PASSED");
+  }
+
   const written = writeGeneratedFiles(parsed.files);
   const specFiles = written.filter(
     (p) => p.startsWith("cypress/e2e/") && p.endsWith(".cy.js")

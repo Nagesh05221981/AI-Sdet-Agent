@@ -35,6 +35,8 @@ EXAMPLE PATTERN (generic — discover actual selectors from the DOM snapshot):
 
 Test data (names, emails, passwords) MUST come from a fixture file loaded
 via cy.fixture() in a before() hook. Include the fixture in your output.
+Name the fixture after the story slug (e.g., cypress/fixtures/user-login.json)
+so different stories don't overwrite each other's fixtures.
 
 If you put cy.get() or .click() or .type() in a spec file, the output is
 REJECTED. This is non-negotiable.
@@ -239,11 +241,13 @@ TEST RULES
 - Tests must be runnable under Cypress v15+ with no extra plugins.
 - One spec per feature; the file name should be the slugified feature name.
 - Do NOT hardcode test data (names, emails, passwords, etc.) in specs.
-  Instead, create a fixture file under cypress/fixtures/<name>.json and load
-  it with cy.fixture() in a before() hook. Example:
+  Instead, create a fixture file under cypress/fixtures/<story-slug>.json
+  and load it with cy.fixture() in a before() hook. Use the story slug as
+  the fixture name so multiple stories don't overwrite each other. Example:
     let testData;
-    before(() => { cy.fixture('users').then(d => { testData = d.signup; }); });
-  Then reference testData.fullName, testData.email, etc. in tests.
+    before(() => { cy.fixture('user-login').then(d => { testData = d; }); });
+  Then reference testData.name, testData.email, etc. in tests.
+  Keep the fixture flat (no nesting like { login: {...} }) — just the data.
   Include the fixture file in your "files" output array.
 
 ================================================================================
