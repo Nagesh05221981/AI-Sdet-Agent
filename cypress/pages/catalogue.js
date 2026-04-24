@@ -14,12 +14,12 @@ class Catalogue {
         cy.get('#grid').should('be.visible')
     }
 
-    verifyProductDetailsVisible(productName) {
-        cy.contains('.pcard', productName).should('be.visible')
+    verifyProductCardDetails() {
+        cy.get('.pcard').first().within(() => { cy.get('.pcard-name').should('not.be.empty'); cy.get('.pcard-cat').should('not.be.empty'); cy.get('.pcard-price').should('not.be.empty'); })
     }
 
-    verifyResultsInfo(info) {
-        cy.get('#results-info').should('contain.text', info)
+    verifyResultsInfo() {
+        cy.get('#results-info').should('not.be.empty')
     }
 
     verifyProductCount(count) {

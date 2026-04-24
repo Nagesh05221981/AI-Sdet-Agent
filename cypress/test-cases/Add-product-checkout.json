@@ -7,9 +7,11 @@
       "title": "Add product to cart",
       "given": "User opens /eclat-shop.html",
       "when": "User clicks the add button on a product card",
-      "then": "The cart count increases by 1",
+      "then": "The cart count in the .cart-pill badge increments by 1",
       "selectors_hint": [
+        ".pcard",
         ".add-btn",
+        ".cart-pill",
         "#cart-count"
       ],
       "priority": "high"
@@ -22,6 +24,8 @@
       "then": "The cart modal displays the added product with correct name, quantity, and price",
       "selectors_hint": [
         ".cart-pill",
+        "#cart-modal",
+        ".cart-item",
         ".cart-item-name",
         ".cart-item-qty",
         ".cart-item-price"
@@ -30,36 +34,37 @@
     },
     {
       "id": "TC-03",
-      "title": "Checkout button enabled",
-      "given": "User has at least one product in the cart",
-      "when": "User views the cart",
+      "title": "Checkout button enabled when cart is not empty",
+      "given": "User has added a product to the cart",
+      "when": "User opens the cart",
       "then": "The checkout button is enabled",
       "selectors_hint": [
-        ".checkout-btn"
+        "#cart-modal",
+        "#checkout-btn"
       ],
       "priority": "medium"
     },
     {
       "id": "TC-04",
-      "title": "Complete checkout process",
-      "given": "User has products in the cart",
+      "title": "Checkout process",
+      "given": "User has added a product to the cart and opened the cart",
       "when": "User clicks the checkout button",
-      "then": "An order confirmation message is displayed",
+      "then": "An order confirmation modal is displayed",
       "selectors_hint": [
-        ".checkout-btn",
-        ".order-confirmation"
+        "#checkout-btn",
+        "#order-confirmation-modal"
       ],
       "priority": "high"
     },
     {
       "id": "TC-05",
       "title": "Dismiss order confirmation",
-      "given": "Order confirmation is displayed",
-      "when": "User clicks continue shopping",
-      "then": "The order confirmation is dismissed and the user returns to the product catalogue",
+      "given": "Order confirmation modal is displayed",
+      "when": "User clicks the continue shopping button",
+      "then": "The order confirmation modal is dismissed",
       "selectors_hint": [
-        ".continue-shopping-btn",
-        ".catalogue"
+        "#order-confirmation-modal",
+        "#continue-shopping-btn"
       ],
       "priority": "medium"
     }

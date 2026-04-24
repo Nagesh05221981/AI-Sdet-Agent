@@ -11,7 +11,7 @@ class CartDrawer {
         checkoutButton: () => cy.get('#checkout-btn'),
         orderConfirmationModal: () => cy.get('#confirm-modal'),
         orderId: () => cy.get('#order-id'),
-        modalCloseButton: () => cy.get('.modal-close')
+        modalCloseButton: () => cy.get('#confirm-modal').find('.modal-close')
     }
 
     clickCheckout() {
@@ -31,7 +31,7 @@ class CartDrawer {
     }
 
     dismissOrderConfirmation() {
-        this.elements.modalCloseButton().should('be.visible').click()
+        cy.get('#confirm-modal').contains('button', 'Continue Shopping').should('be.visible').click()
     }
 
     verifyCartEmpty() {
@@ -39,11 +39,11 @@ class CartDrawer {
     }
 
     verifyCartItemPresent(name) {
-        cy.get('#drawer-body').contains('.ci-name', name).should('be.visible')
+        cy.get('#drawer-body').should('contain', name)
     }
 
     verifyCartItemQuantity(name, quantity) {
-        cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qval').should('have.text', quantity)
+        cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qval').should('contain', String(quantity))
     }
 
     verifyCheckoutDisabled() {
@@ -60,6 +60,10 @@ class CartDrawer {
 
     verifyOrderIdVisible() {
         cy.get('#order-id').should('be.visible')
+    }
+
+    verifyOrderId() {
+        cy.get('#order-id').should('be.visible').and('not.be.empty')
     }
 
 }

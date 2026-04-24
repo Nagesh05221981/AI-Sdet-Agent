@@ -52,16 +52,16 @@ function buildActionMethod(name, action, pageElements) {
     const isParamElement = paramElements.has(step.element);
 
     if (step.do === "click") {
-      // Only pass value to parameterized elements
       const elCall = isParamElement && step.value && methodParams.includes(step.value)
         ? `${elBase}(${step.value})` : `${elBase}()`;
       lines.push(`        ${elCall}.should('be.visible').click()`);
-    } else if (step.do === "clear-type") {
-      const val = step.value || "value";
-      lines.push(`        ${elBase}().should('be.visible').clear().type(${val})`);
-    } else if (step.do === "type") {
-      const val = step.value || "value";
-      lines.push(`        ${elBase}().should('be.visible').type(${val})`);
+    } else if (step.do === "clear-type" || step.do === "type") {
+      // step.value must be a valid method parameter name — skip if null
+      if (!step.value || !methodParams.includes(step.value)) {
+        continue; // invalid step — can't type without a value
+      }
+      const clear = step.do === "clear-type" ? ".clear()" : "";
+      lines.push(`        ${elBase}().should('be.visible')${clear}.type(${step.value})`);
     }
   }
   lines.push(`    }`);

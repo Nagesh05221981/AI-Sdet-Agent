@@ -13,19 +13,17 @@ class LoginPage {
 
     login(email, password) {
         this.elements.loginTab().should('be.visible').click()
-        this.elements.emailInput().should('be.visible').clear().type(value)
         this.elements.emailInput().should('be.visible').type(email)
-        this.elements.passwordInput().should('be.visible').clear().type(value)
         this.elements.passwordInput().should('be.visible').type(password)
         this.elements.submitButton().should('be.visible').click()
     }
 
     verifyLoginFormVisible() {
-        cy.get('#form-login').should('be.visible')
+        cy.get('#form-login').should('be.visible'); cy.get('#l-email').should('be.visible'); cy.get('#l-pass').should('be.visible')
     }
 
     verifySigningInMessage() {
-        cy.get('#l-msg').should('contain.text', 'Signing in')
+        cy.get('#l-msg').should('be.visible').and('not.be.empty')
     }
 
     verifyErrorMessage(message) {

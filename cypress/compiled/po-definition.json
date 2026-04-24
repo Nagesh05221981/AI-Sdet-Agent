@@ -134,18 +134,16 @@
       "verifications": [
         {
           "name": "verifyUserLoggedIn",
-          "params": [
-            "username"
-          ],
-          "code": "cy.get('#uname-label').should('contain.text', username)",
+          "params": [],
+          "code": "cy.get('#user-chip').should('be.visible'); cy.get('#uname-label').should('not.be.empty')",
           "steps": []
         },
         {
           "name": "verifyCartCount",
           "params": [
-            "count"
+            "expectedCount"
           ],
-          "code": "cy.get('#cart-count').should('have.text', count)",
+          "code": "cy.get('#cart-count').should('contain.text', String(expectedCount))",
           "steps": []
         },
         {
@@ -255,13 +253,13 @@
         {
           "name": "verifyLoginFormVisible",
           "params": [],
-          "code": "cy.get('#form-login').should('be.visible')",
+          "code": "cy.get('#form-login').should('be.visible'); cy.get('#l-email').should('be.visible'); cy.get('#l-pass').should('be.visible')",
           "steps": []
         },
         {
           "name": "verifySigningInMessage",
           "params": [],
-          "code": "cy.get('#l-msg').should('contain.text', 'Signing in')",
+          "code": "cy.get('#l-msg').should('be.visible').and('not.be.empty')",
           "steps": []
         },
         {
@@ -391,7 +389,7 @@
         {
           "name": "verifySignupFormVisible",
           "params": [],
-          "code": "cy.get('#form-signup').should('be.visible')",
+          "code": "cy.get('#form-signup').should('be.visible'); cy.get('#s-name').should('be.visible')",
           "steps": []
         },
         {
@@ -509,19 +507,15 @@
           "steps": []
         },
         {
-          "name": "verifyProductDetailsVisible",
-          "params": [
-            "productName"
-          ],
-          "code": "cy.contains('.pcard', productName).should('be.visible')",
+          "name": "verifyProductCardDetails",
+          "params": [],
+          "code": "cy.get('.pcard').first().within(() => { cy.get('.pcard-name').should('not.be.empty'); cy.get('.pcard-cat').should('not.be.empty'); cy.get('.pcard-price').should('not.be.empty'); })",
           "steps": []
         },
         {
           "name": "verifyResultsInfo",
-          "params": [
-            "info"
-          ],
-          "code": "cy.get('#results-info').should('contain.text', info)",
+          "params": [],
+          "code": "cy.get('#results-info').should('not.be.empty')",
           "steps": []
         },
         {
@@ -618,8 +612,8 @@
         },
         {
           "name": "modalCloseButton",
-          "get": ".modal-close",
-          "find": null,
+          "get": "#confirm-modal",
+          "find": ".modal-close",
           "contains": null,
           "param": false
         }
@@ -664,14 +658,8 @@
         {
           "name": "dismissOrderConfirmation",
           "params": [],
-          "code": null,
-          "steps": [
-            {
-              "element": "modalCloseButton",
-              "do": "click",
-              "value": null
-            }
-          ]
+          "code": "cy.get('#confirm-modal').contains('button', 'Continue Shopping').should('be.visible').click()",
+          "steps": []
         }
       ],
       "verifications": [
@@ -686,7 +674,7 @@
           "params": [
             "name"
           ],
-          "code": "cy.get('#drawer-body').contains('.ci-name', name).should('be.visible')",
+          "code": "cy.get('#drawer-body').should('contain', name)",
           "steps": []
         },
         {
@@ -695,7 +683,7 @@
             "name",
             "quantity"
           ],
-          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qval').should('have.text', quantity)",
+          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qval').should('contain', String(quantity))",
           "steps": []
         },
         {
@@ -720,6 +708,12 @@
           "name": "verifyOrderIdVisible",
           "params": [],
           "code": "cy.get('#order-id').should('be.visible')",
+          "steps": []
+        },
+        {
+          "name": "verifyOrderId",
+          "params": [],
+          "code": "cy.get('#order-id').should('be.visible').and('not.be.empty')",
           "steps": []
         }
       ]

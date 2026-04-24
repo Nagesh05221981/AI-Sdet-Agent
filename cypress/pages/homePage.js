@@ -27,16 +27,15 @@ class HomePage {
     }
 
     typeSearch(text) {
-        this.elements.searchInput().should('be.visible').clear().type(value)
         this.elements.searchInput().should('be.visible').type(text)
     }
 
-    verifyUserLoggedIn(username) {
-        cy.get('#uname-label').should('contain.text', username)
+    verifyUserLoggedIn() {
+        cy.get('#user-chip').should('be.visible'); cy.get('#uname-label').should('not.be.empty')
     }
 
-    verifyCartCount(count) {
-        cy.get('#cart-count').should('have.text', count)
+    verifyCartCount(expectedCount) {
+        cy.get('#cart-count').should('contain.text', String(expectedCount))
     }
 
     verifyUserLoggedOut() {

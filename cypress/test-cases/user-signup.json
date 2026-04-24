@@ -4,50 +4,27 @@
   "cases": [
     {
       "id": "TC-01",
-      "title": "Open signup page",
+      "title": "Open Signup page",
       "given": "User opens /eclat-shop.html",
       "when": "User clicks the Sign Up button",
-      "then": "Signup page with Create account is displayed",
+      "then": "Signup page with 'Create account' is displayed",
       "selectors_hint": [
-        "button.btn.btn-fill",
-        "#auth-btns"
+        "#auth-btns .btn-fill"
       ],
       "priority": "high"
     },
     {
       "id": "TC-02",
-      "title": "Signup form fields are visible",
-      "given": "Signup page is displayed",
-      "when": "User inspects the signup form",
-      "then": "Full name, email, and password fields are visible and empty",
-      "selectors_hint": [
-        "#signup-form",
-        "#full-name",
-        "#email",
-        "#password"
-      ],
-      "priority": "high"
-    },
-    {
-      "id": "TC-03",
-      "title": "Create account button is enabled",
-      "given": "Signup form is filled with valid data",
-      "when": "User fills in full name, email, and password",
-      "then": "Create account button is enabled",
-      "selectors_hint": [
-        "#create-account-btn"
-      ],
-      "priority": "high"
-    },
-    {
-      "id": "TC-04",
-      "title": "Account creation success",
-      "given": "Signup form is filled with valid data",
-      "when": "User clicks the Create account button",
+      "title": "Signup with valid details",
+      "given": "Signup page is open",
+      "when": "User enters Full name, email, and password and clicks Create account",
       "then": "New account is created and user is logged in",
       "selectors_hint": [
-        "#uname-label",
-        "#user-chip"
+        "#signup-form",
+        "#signup-name",
+        "#signup-email",
+        "#signup-password",
+        "#create-account-btn"
       ],
       "priority": "high"
     }

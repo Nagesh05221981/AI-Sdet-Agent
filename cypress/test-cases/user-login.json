@@ -4,13 +4,13 @@
   "cases": [
     {
       "id": "TC-01",
-      "title": "Auth modal opens on login button click",
+      "title": "Auth modal opens on Login button click",
       "given": "User opens /eclat-shop.html",
       "when": "User clicks the Login button",
       "then": "The auth modal becomes visible",
       "selectors_hint": [
         "#auth-btns button",
-        ".auth-modal"
+        "#auth-modal"
       ],
       "priority": "high"
     },
@@ -21,8 +21,8 @@
       "when": "User inspects the login form",
       "then": "Email and password input fields are visible",
       "selectors_hint": [
-        ".auth-modal #email-input",
-        ".auth-modal #password-input"
+        "#auth-modal input[type='email']",
+        "#auth-modal input[type='password']"
       ],
       "priority": "high"
     },
@@ -34,7 +34,7 @@
       "then": "#user-chip becomes visible",
       "selectors_hint": [
         "#user-chip",
-        ".auth-modal #login-submit"
+        "#auth-modal button[type='submit']"
       ],
       "priority": "high"
     }

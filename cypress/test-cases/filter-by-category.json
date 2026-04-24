@@ -15,7 +15,7 @@
     },
     {
       "id": "TC-02",
-      "title": "Activate Tech filter chip",
+      "title": "Activate 'Tech' filter chip",
       "given": "Filter chips are visible",
       "when": "user clicks the 'Tech' .fchip",
       "then": "the 'Tech' .fchip gains the .active class",
@@ -26,9 +26,9 @@
     },
     {
       "id": "TC-03",
-      "title": "Filter products by Tech category",
-      "given": "Tech filter chip is active",
-      "when": "the product grid updates",
+      "title": "Filter products by 'Tech' category",
+      "given": "'Tech' filter chip is activated",
+      "when": "the filter is applied",
       "then": "only .pcard elements with .pcard-cat matching 'Tech' are visible",
       "selectors_hint": [
         ".pcard",
@@ -38,10 +38,10 @@
     },
     {
       "id": "TC-04",
-      "title": "Update results info after filtering",
-      "given": "Products are filtered by Tech category",
-      "when": "the product grid updates",
-      "then": "#results-info reflects the count of visible Tech products",
+      "title": "Update results info after filtering by 'Tech'",
+      "given": "'Tech' filter chip is activated",
+      "when": "the filter is applied",
+      "then": "#results-info reflects the count of visible 'Tech' products",
       "selectors_hint": [
         "#results-info"
       ],
@@ -49,10 +49,10 @@
     },
     {
       "id": "TC-05",
-      "title": "Reset filter with All chip",
-      "given": "Products are filtered by Tech category",
+      "title": "Reset filter by clicking 'All' chip",
+      "given": "'Tech' filter chip is activated",
       "when": "user clicks the 'All' .fchip",
-      "then": "all original .pcard elements are visible again",
+      "then": "all original .pcard elements are visible and the 'All' .fchip gains the .active class",
       "selectors_hint": [
         ".fchip",
         ".pcard"
