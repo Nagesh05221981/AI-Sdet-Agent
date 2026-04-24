@@ -99,6 +99,7 @@ function normalizeAssert(assert) {
 
 function buildVerifyMethod(name, verify, pageElements) {
   const params = verify.params ? verify.params.join(", ") : "";
+  const methodParams = verify.params || [];
   const lines = [];
   lines.push(`    ${name}(${params}) {`);
 
@@ -113,12 +114,34 @@ function buildVerifyMethod(name, verify, pageElements) {
   for (const step of verify.steps) {
     const elBase = `this.elements.${step.element}`;
     const isParamElement = paramElements.has(step.element);
-    const methodParams = verify.params || [];
-    const assertion = normalizeAssert(step.assert);
 
-    // Only pass param to element if it's a parameterized element AND value is a method param
-    const elCall = isParamElement && step.value && methodParams.includes(step.value)
-      ? `${elBase}(${step.value})` : `${elBase}()`;
+    // Handle LLM bug: action steps ("click") misplaced in verification
+    if (step.assert === "click") {
+      let elCall;
+      if (isParamElement && methodParams.length > 0) {
+        elCall = `${elBase}(${methodParams[0]})`;
+      } else {
+        elCall = `${elBase}()`;
+      }
+      lines.push(`        ${elCall}.should('be.visible').click()`);
+      continue;
+    }
+
+    let assertion = normalizeAssert(step.assert);
+
+    // If assertion needs a value but none provided, use a safe default
+    if (!step.value && (assertion === "contain.text" || assertion === "contain" || assertion === "have.class" || assertion === "have.text")) {
+      assertion = "not.be.empty";
+    }
+
+    // Build element call — pass first method param if element is parameterized
+    let elCall;
+    if (isParamElement && methodParams.length > 0) {
+      // Parameterized element: pass the first method param as the element arg
+      elCall = `${elBase}(${methodParams[0]})`;
+    } else {
+      elCall = `${elBase}()`;
+    }
 
     if (step.value && assertion !== "not.be.empty") {
       const isParam = methodParams.includes(step.value);

@@ -13,7 +13,7 @@ class FilterBars {
     }
 
     verifyFilterApplied(category) {
-        this.elements.filterChip().should('have.class', 'active')
+        this.elements.filterChip(category).should('have.class', 'active')
     }
 
 }

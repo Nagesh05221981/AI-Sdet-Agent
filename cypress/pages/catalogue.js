@@ -25,7 +25,7 @@ class Catalogue {
     }
 
     verifyResultsInfo() {
-        this.elements.resultsInfo().should('contain.text')
+        this.elements.resultsInfo().should('not.be.empty')
     }
 
 }

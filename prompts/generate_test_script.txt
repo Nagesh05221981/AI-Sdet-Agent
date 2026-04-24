@@ -35,6 +35,13 @@ RULES:
 - Do NOT add beforeEach or before hooks — BaseTest handles those.
 - Do NOT use cy.get, cy.visit, cy.window, or any direct Cypress commands.
 - String literal args must be double-quoted: "\"Tech\"" not "Tech"
+- IMPORTANT: Each it() block starts from a FRESH page load (beforeEach does
+  cy.visit). You MUST include ALL prerequisite steps in EVERY test. For example:
+  - To test login fields: call test.homePage.clickLogIn() FIRST, then verify
+  - To test signup form: call test.homePage.clickSignUp() FIRST, then verify
+  - To test login: call test.homePage.clickLogIn() FIRST, then test.loginPage.login()
+  - To test signup: call test.homePage.clickSignUp() FIRST, then test.signUpPage.signup()
+  Do NOT assume the modal or form is already open from a previous test.
 
 FORMAT FOR STEP CALLS:
   { "call": "test.homePage.clickLogIn" }

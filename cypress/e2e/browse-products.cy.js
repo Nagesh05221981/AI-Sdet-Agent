@@ -6,16 +6,17 @@ describe("Browse Products", () => {
     test.catalogue.verifyGridVisible()
   })
 
-  it("TC-02 Each product card shows name, category, and price", () => {
+  it("TC-02 Each product card exposes name, category and price", () => {
     test.catalogue.verifyProductCardDetails()
   })
 
   it("TC-03 Results info reflects visible product count", () => {
-    test.catalogue.verifyResultsInfo().should('not.be.empty')
+    test.catalogue.verifyResultsInfo()
   })
 
   it("TC-04 Cart starts empty and checkout button is disabled", () => {
-    test.homePage.verifyCartCount(0)
+    test.homePage.openCart()
+    test.cart.verifyCartEmpty()
     test.cart.verifyCheckoutDisabled()
   })
 

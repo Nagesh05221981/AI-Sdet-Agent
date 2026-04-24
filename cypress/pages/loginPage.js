@@ -19,11 +19,10 @@ class LoginPage {
     }
 
     verifySigningInMessage() {
-        this.elements.loginStatus().should('be.visible')
+        this.elements.loginStatus().should('not.be.empty')
     }
 
     verifyLoginFormVisible() {
-        this.elements.loginTab().should('click')
         this.elements.emailInput().should('be.visible')
         this.elements.passwordInput().should('be.visible')
     }

@@ -25,7 +25,6 @@ class SignUpPage {
     }
 
     verifySignupFormVisible() {
-        this.elements.signupTab().should('click')
         this.elements.nameInput().should('be.visible')
     }
 

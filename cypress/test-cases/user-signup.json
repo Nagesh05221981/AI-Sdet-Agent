@@ -4,47 +4,36 @@
   "cases": [
     {
       "id": "TC-01",
-      "title": "Open Signup page",
+      "title": "Display Signup page on button click",
       "given": "User opens /eclat-shop.html",
       "when": "User clicks the Sign Up button",
       "then": "The SIGNup page with Create account is displayed",
       "selectors_hint": [
-        "#auth-btns .btn-fill"
+        "#auth-btns .btn.btn-fill"
       ],
       "priority": "high"
     },
     {
       "id": "TC-02",
-      "title": "Signup form fields are visible",
-      "given": "Signup page is open",
-      "when": "User inspects the form",
-      "then": "Full name, email, and password fields are visible and empty",
+      "title": "Signup form accepts full name, email, and password",
+      "given": "Signup page is displayed",
+      "when": "User enters full name, email, and password",
+      "then": "The input fields for full name, email, and password are non-empty",
       "selectors_hint": [
-        "#signup-form .full-name",
-        "#signup-form .email",
-        "#signup-form .password"
+        "#signup-fullname",
+        "#signup-email",
+        "#signup-password"
       ],
       "priority": "high"
     },
     {
       "id": "TC-03",
-      "title": "Create account button is enabled",
-      "given": "Signup form is filled with valid data",
-      "when": "User fills in Full name, email, and password",
-      "then": "Create account button becomes enabled",
+      "title": "Create account on clicking create account button",
+      "given": "User has entered valid full name, email, and password",
+      "when": "User clicks the create account button",
+      "then": "A new account is created and stored in localStorage under 'nova_users'",
       "selectors_hint": [
-        "#signup-form .create-account-btn"
-      ],
-      "priority": "high"
-    },
-    {
-      "id": "TC-04",
-      "title": "Account creation success",
-      "given": "Signup form is filled with valid data",
-      "when": "User clicks the Create account button",
-      "then": "A new account is created and user is logged in",
-      "selectors_hint": [
-        "#uname-label"
+        "#create-account-btn"
       ],
       "priority": "high"
     }

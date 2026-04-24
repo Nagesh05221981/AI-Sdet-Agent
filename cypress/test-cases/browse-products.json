@@ -16,10 +16,10 @@
     },
     {
       "id": "TC-02",
-      "title": "Each product card shows name, category, and price",
+      "title": "Each product card exposes name, category and price",
       "given": "Grid is rendered",
       "when": "user inspects the first .pcard",
-      "then": ".pcard-name, .pcard-cat, and .pcard-price are all visible and non-empty",
+      "then": ".pcard-name, .pcard-cat and .pcard-price are all visible and non-empty",
       "selectors_hint": [
         ".pcard",
         ".pcard-name",

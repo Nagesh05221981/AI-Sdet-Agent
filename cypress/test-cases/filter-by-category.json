@@ -1,5 +1,5 @@
 {
-  "feature": "Filter by Category",
+  "feature": "Filter By Category",
   "story": "As a shopper, I want to filter the product grid by category so I can browse a single section without scrolling through everything.",
   "cases": [
     {
@@ -29,7 +29,7 @@
       "title": "Filter products by 'Tech' category",
       "given": "'Tech' filter chip is activated",
       "when": "the filter is applied",
-      "then": "only .pcard elements with .pcard-cat matching 'Tech' are visible",
+      "then": "only .pcard elements with .pcard-cat 'Tech' are visible",
       "selectors_hint": [
         ".pcard",
         ".pcard-cat"
@@ -38,7 +38,7 @@
     },
     {
       "id": "TC-04",
-      "title": "Update results info after filtering by 'Tech'",
+      "title": "Update results-info after filtering by 'Tech'",
       "given": "'Tech' filter chip is activated",
       "when": "the filter is applied",
       "then": "#results-info updates to show the count of 'Tech' products",

@@ -4,6 +4,7 @@ const test = new BaseTest()
 describe("User Login", () => {
   it("TC-01 Auth modal opens on Login button click", () => {
     test.homePage.clickLogIn()
+    test.loginPage.verifyLoginFormVisible()
   })
 
   it("TC-02 Login form displays email and password fields", () => {

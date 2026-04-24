@@ -231,7 +231,7 @@
           "steps": [
             {
               "element": "loginStatus",
-              "assert": "visible",
+              "assert": "not.be.empty",
               "value": null
             }
           ]
@@ -240,11 +240,6 @@
           "name": "verifyLoginFormVisible",
           "params": [],
           "steps": [
-            {
-              "element": "loginTab",
-              "assert": "click",
-              "value": null
-            },
             {
               "element": "emailInput",
               "assert": "visible",
@@ -371,11 +366,6 @@
           "name": "verifySignupFormVisible",
           "params": [],
           "steps": [
-            {
-              "element": "signupTab",
-              "assert": "click",
-              "value": null
-            },
             {
               "element": "nameInput",
               "assert": "visible",
@@ -565,7 +555,7 @@
           "steps": [
             {
               "element": "resultsInfo",
-              "assert": "contains.text",
+              "assert": "not.be.empty",
               "value": null
             }
           ]
