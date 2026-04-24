@@ -412,8 +412,10 @@ async function fixAndRetry(pages, dom) {
       return false;
     }
 
-    log("STAGE-4", "Re-running Cypress", `attempt ${attempt}`);
-    const { ok } = await runCypress([SPEC_GLOB]);
+    // Re-run only the failing specs, not the full suite
+    const retrySpecs = failingSpecPaths.map(s => `"${s}"`).join(",");
+    log("STAGE-4", "Re-running Cypress", `attempt ${attempt}, specs: ${failingSpecPaths.join(", ")}`);
+    const { ok } = await runCypress(failingSpecPaths);
 
     if (ok) {
       log("STAGE-4", "Cypress PASSED", `fixed on attempt ${attempt}`);
