@@ -109,6 +109,9 @@ function sanitizeDom(dom) {
     .replace(/\{\{[\s\S]*?\}\}/g, "");           // Remove handlebars
 }
 
+// --- CLI flags --------------------------------------------------------------
+const FORCE = process.argv.includes("--force");
+
 // --- Story discovery --------------------------------------------------------
 function listStoryFiles() {
   if (!fs.existsSync(STORIES_DIR)) return [];
@@ -116,6 +119,10 @@ function listStoryFiles() {
     .filter((f) => f.endsWith(".md"))
     .map((f) => ({ slug: f.replace(/\.md$/, ""), path: path.join(STORIES_DIR, f) }))
     .sort((a, b) => a.slug.localeCompare(b.slug));
+}
+
+function specExistsForSlug(slug) {
+  return fs.existsSync(`cypress/e2e/${slug}.cy.js`);
 }
 
 function resolveStoriesToRun() {
@@ -433,9 +440,17 @@ async function runAISDET() {
   // Stage 0 — Compile Page Objects (one-time)
   const pages = await compilePOs(dom);
 
-  // Stage 1+2 for each story
+  // Stage 1+2 for each story (skip existing specs unless --force)
   const specFiles = [];
+  let skipped = 0;
   for (const story of stories) {
+    if (!FORCE && specExistsForSlug(story.slug)) {
+      const specPath = `cypress/e2e/${story.slug}.cy.js`;
+      log("STORY", "Skipped (spec exists)", `slug=${story.slug}, spec=${specPath} — use --force to regenerate`);
+      specFiles.push(specPath);
+      skipped++;
+      continue;
+    }
     log("STORY", "Processing", `slug=${story.slug}, source=${story.source}`);
     try {
       const cases = await designTestCases(story.slug, story.text, dom);
@@ -446,6 +461,9 @@ async function runAISDET() {
       log("STORY", "FAILED", `slug=${story.slug}: ${e.message}`);
       throw e;
     }
+  }
+  if (skipped > 0) {
+    log("INIT", "Skipped stories", `${skipped} already have specs (${stories.length - skipped} new)`);
   }
 
   // Stage 3 — Run Cypress
