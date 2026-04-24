@@ -75,21 +75,19 @@ OUTPUT RULES (STRICT)
 ================================================================================
 AVAILABLE PAGE OBJECTS (accessed via test instance)
 ================================================================================
-Use ONLY the methods listed in the "Existing Page Objects" block in the
-user message. The Page Objects are:
+The "Existing Page Objects" block in the user message lists every PO with
+its EXACT BaseTest property name and available methods. Example:
 
-- test.homePage — navigation actions (clickLogIn, clickSignUp, openCart,
-  clickLogOut) and verifications (verifyUserChipAfterLogin, verifyLogout,
-  verifyCartCount)
-- test.loginPage — login(email, password), verifySigningInMessage()
-- test.signUpPage — signup(name, email, password), verifySignupSuccessMessage()
-- test.filterBars — clickFilterButton(cat), verifyFiltersBarVisible(),
-  verifyFilterLabel(label), verifyFilterApplied(cat)
-- test.catalogue — product grid verifications, addToCart(name)
-- test.cart — cart operations and verifications
+  test.homePage → HomePage
+    methods: clickLogIn, clickSignUp, verifyCartCount, ...
+  test.cart → CartDrawer
+    methods: verifyCheckoutDisabled, ...
 
-Test data: test.users.validUser (email, password, name),
-           test.users.newUser (email, password, name)
+USE THE test.<propertyName> EXACTLY AS SHOWN. Do NOT guess property names.
+If the block says "test.cart → CartDrawer", use test.cart (NOT test.cartDrawer).
+If the block says "test.catalogue → Catalogue", use test.catalogue (NOT test.catalog).
+
+Use ONLY methods listed in the block. Do NOT invent method names.
 
 ================================================================================
 APP BEHAVIOUR

@@ -38,14 +38,16 @@ OUTPUT RULES (STRICT)
 - "content" is the FULL file source (not a diff or patch). Escape newlines
   as \n inside JSON strings.
 - Only include files that you actually changed. Do NOT re-emit unchanged files.
-- You MUST NOT modify or include these infrastructure files in your output:
+- You MUST NOT modify or include these files in your output:
     cypress/base/baseTest.js
     cypress/support/commands.js
     cypress/support/e2e.js
     cypress/fixtures/users.json
+    cypress/pages/*.js (ALL Page Object files)
   If your output contains any of these files, it will be REJECTED.
-- You may modify spec files (cypress/e2e/*.cy.js) and Page Object files
-  (cypress/pages/*.js) only.
+- You may ONLY modify spec files (cypress/e2e/*.cy.js).
+- If the bug is in a Page Object selector, fix the SPEC to work around it
+  or report it as unfixable. Do NOT rewrite Page Objects.
 - If you determine the spec is unfixable (e.g., the element genuinely does not
   exist in the DOM), return:
   { "files": [], "reason": "brief explanation" }

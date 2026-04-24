@@ -8,22 +8,21 @@ class SignUpPage {
         signupStatus: () => cy.get('#s-msg'),
     }
 
+    switchToSignup() {
+        this.elements.signupTab().click()
+    }
+
+    verifySignupFormVisible() {
+        cy.get('#auth-modal').should('be.visible')
+        cy.get('#form-signup').should('be.visible')
+    }
+
     signup(name, email, password) {
         this.elements.signupTab().click()
         this.elements.nameInput().should('be.visible').clear().type(name)
         this.elements.emailInput().should('be.visible').clear().type(email)
         this.elements.passwordInput().should('be.visible').clear().type(password)
         this.elements.createAccountButton().should('be.visible').click()
-    }
-
-    switchToSignup() {
-        this.elements.signupTab().click()
-    }
-
-    verifySignupFormVisible() {
-        this.elements.nameInput().should('be.visible')
-        this.elements.emailInput().should('be.visible')
-        this.elements.passwordInput().should('be.visible')
     }
 
     verifySignupSuccessMessage() {

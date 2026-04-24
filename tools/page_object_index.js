@@ -79,19 +79,38 @@ export function listPageObjects(pagesDir = PAGES_DIR) {
     });
 }
 
+// Maps PO class names to BaseTest property names.
+// This is the ONLY place specs should reference POs.
+const BASETEST_PROPERTY_MAP = {
+  HomePage: "homePage",
+  LoginPage: "loginPage",
+  SignUpPage: "signUpPage",
+  FilterBars: "filterBars",
+  Catalogue: "catalogue",
+  Cart: "cart",
+  CartDrawer: "cart",
+};
+
 export function buildPageObjectIndexBlock(pagesDir = PAGES_DIR) {
   const pos = listPageObjects(pagesDir);
   if (pos.length === 0) {
     return "Existing Page Objects: (none yet — you may create new ones.)";
   }
-  const lines = ["Existing Page Objects (REUSE — do NOT redefine these files):"];
+  const lines = [
+    "Existing Page Objects — access via test.<propertyName>:",
+    "",
+    "BaseTest property mapping (USE THESE EXACT NAMES in specs):",
+  ];
   for (const po of pos) {
-    lines.push(`- ${po.className}  (${po.file})`);
+    const prop = BASETEST_PROPERTY_MAP[po.className] || po.className.charAt(0).toLowerCase() + po.className.slice(1);
+    lines.push(`  test.${prop} → ${po.className} (${po.file})`);
     if (po.methods.length) {
       lines.push(`    methods: ${po.methods.join(", ")}`);
-    } else {
-      lines.push(`    methods: (none detected — extend as needed)`);
     }
   }
+  lines.push("");
+  lines.push("Test data: test.users.validUser (email, password, name), test.users.newUser (email, password, name)");
+  lines.push("");
+  lines.push("DO NOT use any other property names. DO NOT create Page Objects.");
   return lines.join("\n");
 }

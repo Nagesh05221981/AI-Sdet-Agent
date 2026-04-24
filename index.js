@@ -228,11 +228,18 @@ async function fixAndRetry(generated, dom) {
     }
 
     if (parsed.files && Array.isArray(parsed.files) && parsed.files.length > 0) {
-      // Block fixer from modifying infrastructure files
+      // Block fixer from modifying infrastructure and PO files
       const PROTECTED = new Set([
         "cypress/base/baseTest.js", "cypress/support/commands.js",
         "cypress/support/e2e.js", "cypress/fixtures/users.json",
       ]);
+      // Also protect all Page Object files
+      const poDir = PAGES_DIR;
+      if (fs.existsSync(poDir)) {
+        for (const f of fs.readdirSync(poDir).filter(f => f.endsWith(".js"))) {
+          PROTECTED.add(`${poDir}/${f}`);
+        }
+      }
       const safeFixes = parsed.files.filter(f => {
         if (PROTECTED.has(f.path)) {
           log("STAGE-4", "BLOCKED fixer from modifying", f.path);

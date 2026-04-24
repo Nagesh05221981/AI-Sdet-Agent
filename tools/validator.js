@@ -150,55 +150,68 @@ function validateSelectors(file, dom, errors) {
 function validateSpecPOAlignment(files, errors) {
   const specs = files.filter(f => f.path.endsWith(".cy.js"));
 
-  // Read POs from disk (pre-built by Stage 0) instead of from output files
+  // Valid BaseTest property names
+  const VALID_PROPERTIES = new Set([
+    "homePage", "loginPage", "signUpPage", "filterBars", "catalogue", "cart", "users",
+  ]);
+
+  // Read POs from disk and build a map: propertyName → Set of methods
   const poDir = "cypress/pages";
-  const pos = [];
+  const propertyToMethods = {};
+  const classToProperty = {
+    HomePage: "homePage", LoginPage: "loginPage", SignUpPage: "signUpPage",
+    FilterBars: "filterBars", Catalogue: "catalogue", Cart: "cart", CartDrawer: "cart",
+  };
+
   if (fs.existsSync(poDir)) {
     for (const f of fs.readdirSync(poDir).filter(f => f.endsWith(".js"))) {
-      pos.push({ path: `${poDir}/${f}`, content: fs.readFileSync(`${poDir}/${f}`, "utf-8") });
+      const content = fs.readFileSync(`${poDir}/${f}`, "utf-8");
+      // Detect class name
+      const classMatch = content.match(/class\s+(\w+)/);
+      const className = classMatch ? classMatch[1] : f.replace(".js", "");
+      const prop = classToProperty[className] || className.charAt(0).toLowerCase() + className.slice(1);
+
+      const methods = new Set();
+      let m;
+      // Getters
+      const getterRe = /get\s+([\w]+)\s*\(\)/g;
+      while ((m = getterRe.exec(content)) !== null) methods.add(m[1]);
+      // Methods
+      const methodRe = /^\s*([\w]+)\s*\([^)]*\)\s*\{/gm;
+      while ((m = methodRe.exec(content)) !== null) {
+        if (!["get", "set", "constructor", "if", "for", "while", "class"].includes(m[1])) {
+          methods.add(m[1]);
+        }
+      }
+      // Elements
+      const elemRe = /^\s*([\w]+)\s*:\s*(?:\([^)]*\)\s*=>|\(\)\s*=>)/gm;
+      while ((m = elemRe.exec(content)) !== null) methods.add(m[1]);
+
+      propertyToMethods[prop] = methods;
     }
-  }
-  // Also check BaseTest
-  const baseTestPath = "cypress/base/baseTest.js";
-  if (fs.existsSync(baseTestPath)) {
-    pos.push({ path: baseTestPath, content: fs.readFileSync(baseTestPath, "utf-8") });
   }
 
   for (const spec of specs) {
-    // Find PO method calls: page.someMethod() or page.someGetter.
-    const methodCallRe = /(?:page|authPage|shopPage|filterPage|signupPage)\.([\w]+)\s*\(/g;
-    const getterRe = /(?:page|authPage|shopPage|filterPage|signupPage)\.([\w]+)\./g;
-
-    const usedMembers = new Set();
+    // Check test.<property> usage — validate property names
+    const propRe = /test\.([\w]+)\./g;
     let m;
-    while ((m = methodCallRe.exec(spec.content)) !== null) usedMembers.add(m[1]);
-    while ((m = getterRe.exec(spec.content)) !== null) usedMembers.add(m[1]);
+    const usedProperties = new Set();
+    while ((m = propRe.exec(spec.content)) !== null) usedProperties.add(m[1]);
 
-    // Also catch page.someGetter.should(...)
-    const getterShouldRe = /(?:page|authPage|shopPage|filterPage|signupPage)\.([\w]+)\.should/g;
-    while ((m = getterShouldRe.exec(spec.content)) !== null) usedMembers.add(m[1]);
-
-    // Collect all members defined in POs
-    const definedMembers = new Set();
-    for (const po of pos) {
-      // Getters: get foo() {
-      const getterDefRe = /get\s+([\w]+)\s*\(\)/g;
-      while ((m = getterDefRe.exec(po.content)) !== null) definedMembers.add(m[1]);
-      // Methods: foo(...) {
-      const methodDefRe = /^\s*([\w]+)\s*\([^)]*\)\s*\{/gm;
-      while ((m = methodDefRe.exec(po.content)) !== null) {
-        if (!["get", "set", "constructor", "if", "for", "while"].includes(m[1])) {
-          definedMembers.add(m[1]);
-        }
+    for (const prop of usedProperties) {
+      if (!VALID_PROPERTIES.has(prop)) {
+        errors.push(`${spec.path} — uses test.${prop} but BaseTest has no property "${prop}" (valid: ${[...VALID_PROPERTIES].join(", ")})`);
       }
     }
 
-    // Check for missing members
-    for (const member of usedMembers) {
-      if (!definedMembers.has(member) && member !== "should" && member !== "then"
-          && member !== "each" && member !== "first" && member !== "find"
-          && member !== "contains" && member !== "invoke" && member !== "its") {
-        errors.push(`${spec.path} — calls page.${member}() but no Page Object defines "${member}"`);
+    // Check test.<property>.<method>() — validate method names
+    const callRe = /test\.([\w]+)\.([\w]+)/g;
+    while ((m = callRe.exec(spec.content)) !== null) {
+      const [, prop, method] = m;
+      if (prop === "users") continue; // test.users.validUser is data, not PO
+      const methods = propertyToMethods[prop];
+      if (methods && !methods.has(method)) {
+        errors.push(`${spec.path} — calls test.${prop}.${method}() but ${prop} has no method "${method}" (available: ${[...methods].join(", ")})`);
       }
     }
   }
