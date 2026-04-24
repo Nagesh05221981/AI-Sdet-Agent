@@ -279,7 +279,88 @@ describe("Feature", () => {
 
 ---
 
-## 8. Observability
+## 8. Self-Healing Locators
+
+When the app's DOM changes (e.g., `#cart-count` renamed to `#cart-badge`), existing
+PO selectors break. The self-healing locator system detects and fixes these automatically.
+
+### Architecture
+
+```
+Cypress run fails with selector_issue
+  │
+  ▼
+Stage 4.5: Locator Healer
+  │
+  ├── 1. Read failure log → extract broken selector(s)
+  │
+  ├── 2. Read current DOM snapshot (post-failure, captured by afterEach)
+  │
+  ├── 3. Read compiled PO definition (po-definition.json)
+  │
+  ├── 4. For each broken selector:
+  │      ├── Search DOM for the element by:
+  │      │   - Nearby text content
+  │      │   - Similar class names (fuzzy match)
+  │      │   - Same position/structure in DOM tree
+  │      │   - Parent/sibling context
+  │      └── LLM compares old selector vs DOM → suggests new selector
+  │
+  ├── 5. Update po-definition.json with new selector
+  │
+  ├── 6. Regenerate PO code from updated JSON (deterministic template)
+  │
+  └── 7. Re-run Cypress with updated POs
+```
+
+### How It Works
+
+1. **Detection**: `classifyFailure()` returns `selector_issue` when Cypress reports
+   "Expected to find element" errors.
+
+2. **Extraction**: Parse the failure log to find which selector(s) failed and which
+   PO file/method they belong to.
+
+3. **DOM Comparison**: Read the fresh DOM snapshot (captured by `cy.captureDom` in
+   `afterEach`). Send the broken selector + surrounding DOM context to the LLM.
+
+4. **Healing**: LLM suggests the correct replacement selector based on the DOM.
+   The suggestion is validated (element must exist in DOM) before applying.
+
+5. **Update**: The fix is applied to `po-definition.json` (the JSON source of truth),
+   not directly to the JavaScript PO files. The template then regenerates the
+   PO code deterministically.
+
+6. **Verification**: Cypress re-runs with the updated PO. If it passes, the
+   healed `po-definition.json` is committed for future runs.
+
+### What It Can Fix
+
+| Scenario | Example | How |
+|----------|---------|-----|
+| ID renamed | `#cart-count` → `#cart-badge` | LLM finds new ID by context |
+| Class renamed | `.pcard-name` → `.product-title` | LLM matches by element position/content |
+| Element moved | Button moved to different parent | LLM updates get/find chain |
+| Element removed | Feature deleted from app | Reports as unfixable |
+
+### What It Cannot Fix
+
+- **Logic changes**: If the app's behavior changes (not just selectors), the test
+  cases themselves need updating — that's a new story, not a locator fix.
+- **New features**: New elements added to the app need Stage 0 recompilation
+  (`rm -rf cypress/compiled && node index.js`).
+
+### Guardrails
+
+- Healer only modifies selectors in `po-definition.json` — never touches
+  method names, action logic, or verification logic.
+- Every suggested selector is validated against the DOM before applying.
+- Maximum 1 healing cycle per run — prevents infinite loops.
+- Changes are logged to `pipeline.log` for audit trail.
+
+---
+
+## 9. Observability
 
 - **pipeline.log**: `[timestamp] [STAGE] action — detail` for every step
 - **cypress-failure.log**: Full Cypress stdout/stderr on failure
@@ -342,20 +423,26 @@ rm -rf cypress/compiled && node index.js
 - [x] Prompt injection protection
 - [x] gpt-4o-mini → gpt-4o upgrade
 
+- [x] Code escape hatch for complex PO actions (cy.contains scoping, parent/find chains)
+- [x] Complete PO generation — all elements, all actions, all verifications from DOM
+- [x] Incremental story runs — skip existing specs, generate only new ones
+- [x] `--force` flag for spec regeneration
+- [x] Targeted fixer retries — re-run only failing specs, not full suite
+- [x] Empty story rejection — prevents LLM hallucination
+- [x] Template assertion normalization (visible→be.visible, contains→not.be.empty)
+- [x] First-run pass rate: ~90%+ (4/5 stories pass consistently on first run)
+
 ### In Progress
 
-- [ ] Template edge case fixes (assertion normalization, parameterized elements)
-- [ ] First-run pass rate: currently ~60-80%, target 100%
+- [ ] **Self-healing locators** — auto-detect and fix broken selectors when app DOM changes
 
 ### Next Steps
 
-- [ ] **True ReAct agents** with tools (DOM reader, file writer, Cypress runner) for autonomous reasoning
-- [ ] **Multi-attribute element fingerprinting** for self-healing (ID + class + text + position)
 - [ ] **CI/CD integration** — GitHub Actions workflow with story matrix
+- [ ] **True ReAct agents** with tools (DOM reader, file writer, Cypress runner)
 - [ ] **Visual regression** — screenshot comparison between runs
 - [ ] **Case-level result reporting** — per-TC pass/fail feeding back to LangSmith
 - [ ] **Playwright support** — same JSON definitions, different code template
-- [ ] **Dynamic PO updates** — detect app changes via DOM diff, regenerate only affected POs
 
 ### Future Vision
 
@@ -379,6 +466,9 @@ rm -rf cypress/compiled && node index.js
 | Per-story fixtures | Prevents cross-story data collisions |
 | Structured Outputs for PO schema | 100% JSON compliance via constrained decoding |
 | gpt-4o over gpt-4o-mini | Better DOM comprehension, rule following, and multi-step reasoning |
+| Heal via JSON, not code | Locator fixes update po-definition.json, template regenerates code — deterministic |
+| Targeted fixer retries | Re-run only failing specs on retry, not full suite — scales to large test suites |
+| Hybrid actions (steps + code) | Simple actions use template steps, complex scoped actions use raw code escape hatch |
 
 ---
 
