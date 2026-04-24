@@ -451,6 +451,11 @@ async function runAISDET() {
       skipped++;
       continue;
     }
+    // Reject empty stories
+    if (!story.text || story.text.trim().length < 10) {
+      log("STORY", "SKIPPED — empty or too short", `slug=${story.slug}, length=${(story.text || "").length} chars`);
+      continue;
+    }
     log("STORY", "Processing", `slug=${story.slug}, source=${story.source}`);
     try {
       const cases = await designTestCases(story.slug, story.text, dom);
