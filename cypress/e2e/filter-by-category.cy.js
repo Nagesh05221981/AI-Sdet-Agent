@@ -1,33 +1,29 @@
-import ShopPage from '../support/pages/ShopPage.js';
+import { BaseTest } from "../base/baseTest"
+const test = new BaseTest()
 
-describe('Filter By Category', () => {
-  const page = new ShopPage();
+describe("Filter by Category", () => {
+  it("TC-01 All filter chips are visible on load", () => {
+    test.filterBars.verifyFiltersBarVisible()
+  })
 
-  beforeEach(() => {
-    cy.visit('/eclat-shop.html');
-  });
+  it("TC-02 Tech filter chip activates on click", () => {
+    test.filterBars.clickFilterButton('Tech')
+    test.filterBars.verifyFilterApplied('Tech')
+  })
 
-  it('TC-01 all filter chips are visible on load', () => {
-    page.filterChips.should('be.visible');
-  });
+  it("TC-03 Only Tech products are visible after filtering", () => {
+    test.filterBars.clickFilterButton('Tech')
+    test.catalogue.verifyCategoryTitle('Tech')
+  })
 
-  it('TC-02 clicking Tech activates the filter chip', () => {
-    page.filterChips.contains('Tech').click();
-    page.filterChips.contains('Tech').should('have.class', 'active');
-  });
+  it("TC-04 Results info updates after filtering", () => {
+    test.filterBars.clickFilterButton('Tech')
+    test.catalogue.verifyResultsInfo()
+  })
 
-  it('TC-03 filtering by Tech shows relevant products', () => {
-    page.filterChips.contains('Tech').click();
-    page.productCards.each(($card) => {
-      cy.wrap($card).find('.pcard-cat').should('contain', 'Tech');
-    });
-    page.resultsInfo.should('not.be.empty');
-  });
-
-  it('TC-04 clicking All resets the filter', () => {
-    page.filterChips.contains('Tech').click();
-    page.filterChips.contains('All').click();
-    page.productCards.should('be.visible');
-    page.resultsInfo.should('not.be.empty');
-  });
-});
+  it("TC-05 Filter resets on clicking 'All' chip", () => {
+    test.filterBars.clickFilterButton('Tech')
+    test.filterBars.clickFilterButton('All')
+    test.catalogue.verifyGridVisible()
+  })
+})
