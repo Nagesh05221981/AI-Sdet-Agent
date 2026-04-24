@@ -1,5 +1,3 @@
-// Custom Cypress commands
-
 Cypress.Commands.add('seedUser', (user) => {
     if (!user) return
     const users = JSON.parse(localStorage.getItem('nova_users')) || {}

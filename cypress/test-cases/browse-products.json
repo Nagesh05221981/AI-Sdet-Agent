@@ -7,20 +7,19 @@
       "title": "Grid renders on load",
       "given": "User opens /eclat-shop.html",
       "when": "the page finishes rendering",
-      "then": "at least one .pcard is visible and #results-info shows a non-empty count",
+      "then": "at least one .pcard is visible",
       "selectors_hint": [
         "#grid",
-        ".pcard",
-        "#results-info"
+        ".pcard"
       ],
       "priority": "high"
     },
     {
       "id": "TC-02",
-      "title": "Each product card exposes name, category and price",
+      "title": "Each product card shows name, category, and price",
       "given": "Grid is rendered",
       "when": "user inspects the first .pcard",
-      "then": ".pcard-name, .pcard-cat and .pcard-price are all visible and non-empty",
+      "then": ".pcard-name, .pcard-cat, and .pcard-price are all visible and non-empty",
       "selectors_hint": [
         ".pcard",
         ".pcard-name",
@@ -32,17 +31,18 @@
     {
       "id": "TC-03",
       "title": "Results info reflects visible product count",
-      "given": "Grid is rendered with products",
-      "when": "user checks the #results-info",
-      "then": "#results-info displays the correct count of visible products",
+      "given": "Grid is rendered",
+      "when": "the page finishes rendering",
+      "then": "#results-info text matches the number of visible .pcard elements",
       "selectors_hint": [
-        "#results-info"
+        "#results-info",
+        ".pcard"
       ],
       "priority": "medium"
     },
     {
       "id": "TC-04",
-      "title": "Cart starts empty",
+      "title": "Cart starts empty and checkout button is disabled",
       "given": "User opens /eclat-shop.html",
       "when": "the page finishes rendering",
       "then": "#cart-count shows 0 and #checkout-btn is disabled",

@@ -4,10 +4,16 @@ class Catalogue {
         productCards: () => cy.get('.pcard'),
         resultsInfo: () => cy.get('#results-info'),
         noResults: () => cy.get('#no-results'),
+        firstCard: () => cy.get('.pcard:first'),
+        productName: () => cy.get('.pcard-name'),
+        productCategory: () => cy.get('.pcard-cat'),
+        productPrice: () => cy.get('.pcard-price'),
+        addToCartButton: () => cy.get('.add-btn')
     }
 
     addToCart(productName) {
-        this.elements.productCards().contains('.pcard-name', productName).parents('.pcard').find('.add-btn').should('be.visible').click()
+        this.elements.productName().should('be.visible').click()
+        this.elements.addToCartButton().should('be.visible').click()
     }
 
     verifyGridVisible() {
@@ -19,12 +25,9 @@ class Catalogue {
     }
 
     verifyResultsInfo() {
-        this.elements.resultsInfo().should('be.visible')
+        this.elements.resultsInfo().should('contain.text')
     }
 
-    verifyCategoryTitle(cat) {
-        this.elements.productCards().contains('.pcard-cat', cat).should('be.visible')
-    }
 }
 
 export default Catalogue

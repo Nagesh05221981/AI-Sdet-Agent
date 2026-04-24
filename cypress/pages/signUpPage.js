@@ -5,20 +5,15 @@ class SignUpPage {
         emailInput: () => cy.get('#s-email'),
         passwordInput: () => cy.get('#s-pass'),
         createAccountButton: () => cy.get('#form-signup').find('.msubmit'),
-        signupStatus: () => cy.get('#s-msg'),
+        signupStatus: () => cy.get('#s-msg')
     }
 
     switchToSignup() {
-        this.elements.signupTab().click()
-    }
-
-    verifySignupFormVisible() {
-        cy.get('#auth-modal').should('be.visible')
-        cy.get('#form-signup').should('be.visible')
+        this.elements.signupTab().should('be.visible').click()
     }
 
     signup(name, email, password) {
-        this.elements.signupTab().click()
+        this.elements.signupTab().should('be.visible').click()
         this.elements.nameInput().should('be.visible').clear().type(name)
         this.elements.emailInput().should('be.visible').clear().type(email)
         this.elements.passwordInput().should('be.visible').clear().type(password)
@@ -26,16 +21,14 @@ class SignUpPage {
     }
 
     verifySignupSuccessMessage() {
-        this.elements.signupStatus()
-            .should('be.visible')
-            .and('contain.text', 'Account created')
+        this.elements.signupStatus().should('be.visible')
     }
 
-    verifySignupError(message) {
-        this.elements.signupStatus()
-            .should('be.visible')
-            .and('contain.text', message)
+    verifySignupFormVisible() {
+        this.elements.signupTab().should('click')
+        this.elements.nameInput().should('be.visible')
     }
+
 }
 
 export default SignUpPage

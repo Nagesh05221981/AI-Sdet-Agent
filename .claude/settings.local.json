@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check index.js)",
+      "Bash(node:*)",
+      "Bash(npx cypress:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(curl:*)",
+      "Bash(python3 -m json.tool)",
+      "Bash(ls -la .eslintrc* .prettierrc* .editorconfig)",
+      "Bash(ls -la cypress/.eslintrc*)",
+      "WebSearch",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d['pages'][4]['verifications'][0], indent=2\\)\\)\")",
+      "Bash(python3 -c ':*)"
+    ]
+  }
+}

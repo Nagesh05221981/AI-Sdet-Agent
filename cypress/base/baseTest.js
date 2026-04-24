@@ -1,9 +1,9 @@
-import HomePage from "../pages/homePage"
-import LoginPage from "../pages/loginPage"
-import SignUpPage from "../pages/signUpPage"
-import FilterBars from "../pages/filterBars"
-import Catalogue from "../pages/catalogue"
-import Cart from "../pages/cartDrawer"
+import HomePage from "../pages/homePage.js"
+import LoginPage from "../pages/loginPage.js"
+import SignUpPage from "../pages/signUpPage.js"
+import FilterBars from "../pages/filterBars.js"
+import Catalogue from "../pages/catalogue.js"
+import CartDrawer from "../pages/cartDrawer.js"
 
 export class BaseTest {
     homePage = new HomePage()
@@ -11,7 +11,7 @@ export class BaseTest {
     signUpPage = new SignUpPage()
     filterBars = new FilterBars()
     catalogue = new Catalogue()
-    cart = new Cart()
+    cart = new CartDrawer()
     users = {}
 
     constructor() {

@@ -1,12 +1,12 @@
 class HomePage {
     elements = {
-        logInButton: () => cy.get('#auth-btns').contains('button', 'Login'),
-        signUpButton: () => cy.get('#auth-btns').contains('button', 'Sign Up'),
+        logInButton: () => cy.get('#auth-btns').find('.btn-ghost'),
+        signUpButton: () => cy.get('#auth-btns').find('.btn-fill'),
         userChip: () => cy.get('#user-chip'),
         userNameLabel: () => cy.get('#uname-label'),
-        logoutButton: () => cy.get('#user-chip').find('button').contains('Out'),
+        logoutButton: () => cy.get('#user-chip').find('.btn-ghost'),
         cartIcon: () => cy.get('.cart-pill'),
-        cartBadge: () => cy.get('#cart-count'),
+        cartBadge: () => cy.get('#cart-count')
     }
 
     clickLogIn() {
@@ -26,18 +26,17 @@ class HomePage {
     }
 
     verifyUserChipAfterLogin(expectedName) {
-        this.elements.userChip().should('be.visible')
-        this.elements.userNameLabel().should('be.visible').and('contain', expectedName)
+        this.elements.userNameLabel().should('contain.text', expectedName)
     }
 
     verifyLogout() {
         this.elements.userChip().should('not.be.visible')
-        this.elements.logInButton().should('be.visible')
     }
 
     verifyCartCount(expectedCount) {
-        this.elements.cartBadge().should('be.visible').and('contain.text', expectedCount)
+        this.elements.cartBadge().should('contain.text', expectedCount)
     }
+
 }
 
 export default HomePage

@@ -1,0 +1,52 @@
+{
+  "feature": "User Signup",
+  "story": "As a shopper, I want to Signup for the ecommerce store.",
+  "cases": [
+    {
+      "id": "TC-01",
+      "title": "Open Signup page",
+      "given": "User opens /eclat-shop.html",
+      "when": "User clicks the Sign Up button",
+      "then": "The SIGNup page with Create account is displayed",
+      "selectors_hint": [
+        "#auth-btns .btn-fill"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-02",
+      "title": "Signup form fields are visible",
+      "given": "Signup page is open",
+      "when": "User inspects the form",
+      "then": "Full name, email, and password fields are visible and empty",
+      "selectors_hint": [
+        "#signup-form .full-name",
+        "#signup-form .email",
+        "#signup-form .password"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-03",
+      "title": "Create account button is enabled",
+      "given": "Signup form is filled with valid data",
+      "when": "User fills in Full name, email, and password",
+      "then": "Create account button becomes enabled",
+      "selectors_hint": [
+        "#signup-form .create-account-btn"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-04",
+      "title": "Account creation success",
+      "given": "Signup form is filled with valid data",
+      "when": "User clicks the Create account button",
+      "then": "A new account is created and user is logged in",
+      "selectors_hint": [
+        "#uname-label"
+      ],
+      "priority": "high"
+    }
+  ]
+}

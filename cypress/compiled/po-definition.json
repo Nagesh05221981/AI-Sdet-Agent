@@ -1,0 +1,648 @@
+{
+  "pages": [
+    {
+      "className": "HomePage",
+      "property": "homePage",
+      "file": "cypress/pages/homePage.js",
+      "elements": [
+        {
+          "name": "logInButton",
+          "get": "#auth-btns",
+          "find": ".btn-ghost",
+          "contains": "Login",
+          "param": false
+        },
+        {
+          "name": "signUpButton",
+          "get": "#auth-btns",
+          "find": ".btn-fill",
+          "contains": "Sign Up",
+          "param": false
+        },
+        {
+          "name": "userChip",
+          "get": "#user-chip",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "userNameLabel",
+          "get": "#uname-label",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "logoutButton",
+          "get": "#user-chip",
+          "find": ".btn-ghost",
+          "contains": "Out",
+          "param": false
+        },
+        {
+          "name": "cartIcon",
+          "get": ".cart-pill",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "cartBadge",
+          "get": "#cart-count",
+          "find": null,
+          "contains": null,
+          "param": false
+        }
+      ],
+      "actions": [
+        {
+          "name": "clickLogIn",
+          "params": [],
+          "steps": [
+            {
+              "element": "logInButton",
+              "do": "click",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "clickSignUp",
+          "params": [],
+          "steps": [
+            {
+              "element": "signUpButton",
+              "do": "click",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "openCart",
+          "params": [],
+          "steps": [
+            {
+              "element": "cartIcon",
+              "do": "click",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "clickLogOut",
+          "params": [],
+          "steps": [
+            {
+              "element": "logoutButton",
+              "do": "click",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "verifications": [
+        {
+          "name": "verifyUserChipAfterLogin",
+          "params": [
+            "expectedName"
+          ],
+          "steps": [
+            {
+              "element": "userNameLabel",
+              "assert": "contains.text",
+              "value": "expectedName"
+            }
+          ]
+        },
+        {
+          "name": "verifyLogout",
+          "params": [],
+          "steps": [
+            {
+              "element": "userChip",
+              "assert": "not.visible",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "verifyCartCount",
+          "params": [
+            "expectedCount"
+          ],
+          "steps": [
+            {
+              "element": "cartBadge",
+              "assert": "contains.text",
+              "value": "expectedCount"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "className": "LoginPage",
+      "property": "loginPage",
+      "file": "cypress/pages/loginPage.js",
+      "elements": [
+        {
+          "name": "loginTab",
+          "get": "#tab-login",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "emailInput",
+          "get": "#l-email",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "passwordInput",
+          "get": "#l-pass",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "signInButton",
+          "get": "#form-login",
+          "find": ".msubmit",
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "loginStatus",
+          "get": "#l-msg",
+          "find": null,
+          "contains": null,
+          "param": false
+        }
+      ],
+      "actions": [
+        {
+          "name": "switchToLogin",
+          "params": [],
+          "steps": [
+            {
+              "element": "loginTab",
+              "do": "click",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "login",
+          "params": [
+            "email",
+            "password"
+          ],
+          "steps": [
+            {
+              "element": "loginTab",
+              "do": "click",
+              "value": null
+            },
+            {
+              "element": "emailInput",
+              "do": "clear-type",
+              "value": "email"
+            },
+            {
+              "element": "passwordInput",
+              "do": "clear-type",
+              "value": "password"
+            },
+            {
+              "element": "signInButton",
+              "do": "click",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "verifications": [
+        {
+          "name": "verifySigningInMessage",
+          "params": [],
+          "steps": [
+            {
+              "element": "loginStatus",
+              "assert": "visible",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "verifyLoginFormVisible",
+          "params": [],
+          "steps": [
+            {
+              "element": "loginTab",
+              "assert": "click",
+              "value": null
+            },
+            {
+              "element": "emailInput",
+              "assert": "visible",
+              "value": null
+            },
+            {
+              "element": "passwordInput",
+              "assert": "visible",
+              "value": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "className": "SignUpPage",
+      "property": "signUpPage",
+      "file": "cypress/pages/signUpPage.js",
+      "elements": [
+        {
+          "name": "signupTab",
+          "get": "#tab-signup",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "nameInput",
+          "get": "#s-name",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "emailInput",
+          "get": "#s-email",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "passwordInput",
+          "get": "#s-pass",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "createAccountButton",
+          "get": "#form-signup",
+          "find": ".msubmit",
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "signupStatus",
+          "get": "#s-msg",
+          "find": null,
+          "contains": null,
+          "param": false
+        }
+      ],
+      "actions": [
+        {
+          "name": "switchToSignup",
+          "params": [],
+          "steps": [
+            {
+              "element": "signupTab",
+              "do": "click",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "signup",
+          "params": [
+            "name",
+            "email",
+            "password"
+          ],
+          "steps": [
+            {
+              "element": "signupTab",
+              "do": "click",
+              "value": null
+            },
+            {
+              "element": "nameInput",
+              "do": "clear-type",
+              "value": "name"
+            },
+            {
+              "element": "emailInput",
+              "do": "clear-type",
+              "value": "email"
+            },
+            {
+              "element": "passwordInput",
+              "do": "clear-type",
+              "value": "password"
+            },
+            {
+              "element": "createAccountButton",
+              "do": "click",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "verifications": [
+        {
+          "name": "verifySignupSuccessMessage",
+          "params": [],
+          "steps": [
+            {
+              "element": "signupStatus",
+              "assert": "visible",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "verifySignupFormVisible",
+          "params": [],
+          "steps": [
+            {
+              "element": "signupTab",
+              "assert": "click",
+              "value": null
+            },
+            {
+              "element": "nameInput",
+              "assert": "visible",
+              "value": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "className": "FilterBars",
+      "property": "filterBars",
+      "file": "cypress/pages/filterBars.js",
+      "elements": [
+        {
+          "name": "filtersBar",
+          "get": ".filters-bar",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "filterChip",
+          "get": ".fchip",
+          "find": null,
+          "contains": null,
+          "param": true
+        }
+      ],
+      "actions": [
+        {
+          "name": "clickFilterButton",
+          "params": [
+            "category"
+          ],
+          "steps": [
+            {
+              "element": "filterChip",
+              "do": "click",
+              "value": "category"
+            }
+          ]
+        }
+      ],
+      "verifications": [
+        {
+          "name": "verifyFiltersBarVisible",
+          "params": [],
+          "steps": [
+            {
+              "element": "filtersBar",
+              "assert": "visible",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "verifyFilterApplied",
+          "params": [
+            "category"
+          ],
+          "steps": [
+            {
+              "element": "filterChip",
+              "assert": "has.class",
+              "value": "active"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "className": "Catalogue",
+      "property": "catalogue",
+      "file": "cypress/pages/catalogue.js",
+      "elements": [
+        {
+          "name": "grid",
+          "get": "#grid",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "productCards",
+          "get": ".pcard",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "resultsInfo",
+          "get": "#results-info",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "noResults",
+          "get": "#no-results",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "firstCard",
+          "get": ".pcard:first",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "productName",
+          "get": ".pcard-name",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "productCategory",
+          "get": ".pcard-cat",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "productPrice",
+          "get": ".pcard-price",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "addToCartButton",
+          "get": ".add-btn",
+          "find": null,
+          "contains": null,
+          "param": false
+        }
+      ],
+      "actions": [
+        {
+          "name": "addToCart",
+          "params": [
+            "productName"
+          ],
+          "steps": [
+            {
+              "element": "productName",
+              "do": "click",
+              "value": "productName"
+            },
+            {
+              "element": "addToCartButton",
+              "do": "click",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "verifications": [
+        {
+          "name": "verifyGridVisible",
+          "params": [],
+          "steps": [
+            {
+              "element": "grid",
+              "assert": "visible",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "verifyProductCardDetails",
+          "params": [],
+          "steps": [
+            {
+              "element": "productCards",
+              "assert": "visible",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "verifyResultsInfo",
+          "params": [],
+          "steps": [
+            {
+              "element": "resultsInfo",
+              "assert": "contains.text",
+              "value": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "className": "CartDrawer",
+      "property": "cart",
+      "file": "cypress/pages/cartDrawer.js",
+      "elements": [
+        {
+          "name": "drawer",
+          "get": "#drawer",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "drawerBody",
+          "get": "#drawer-body",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "cartTotal",
+          "get": "#cart-total",
+          "find": null,
+          "contains": null,
+          "param": false
+        },
+        {
+          "name": "checkoutButton",
+          "get": "#checkout-btn",
+          "find": null,
+          "contains": null,
+          "param": false
+        }
+      ],
+      "actions": [
+        {
+          "name": "clickCheckout",
+          "params": [],
+          "steps": [
+            {
+              "element": "checkoutButton",
+              "do": "click",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "verifications": [
+        {
+          "name": "verifyCartEmpty",
+          "params": [],
+          "steps": [
+            {
+              "element": "drawerBody",
+              "assert": "empty",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "verifyCheckoutDisabled",
+          "params": [],
+          "steps": [
+            {
+              "element": "checkoutButton",
+              "assert": "disabled",
+              "value": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

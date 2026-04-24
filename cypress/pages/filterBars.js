@@ -1,16 +1,21 @@
-export default class FilterBars {
-  get filtersBar() { return cy.get('.filters-bar'); }
-  get filterChip() { return cy.get('.fchip'); }
+class FilterBars {
+    elements = {
+        filtersBar: () => cy.get('.filters-bar'),
+        filterChip: (param) => cy.contains('.fchip', param)
+    }
 
-  verifyFiltersBarVisible() {
-    this.filtersBar.should('be.visible');
-  }
+    clickFilterButton(category) {
+        this.elements.filterChip(category).should('be.visible').click()
+    }
 
-  clickFilterButton(category) {
-    this.filterChip.contains(category, { timeout: 10000 }).click();
-  }
+    verifyFiltersBarVisible() {
+        this.elements.filtersBar().should('be.visible')
+    }
 
-  verifyFilterApplied(category) {
-    this.filterChip.contains(category).should('have.class', 'active');
-  }
+    verifyFilterApplied(category) {
+        this.elements.filterChip().should('have.class', 'active')
+    }
+
 }
+
+export default FilterBars

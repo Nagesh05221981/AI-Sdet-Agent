@@ -1,10 +1,10 @@
 {
-  "feature": "Filter By Category",
+  "feature": "Filter by Category",
   "story": "As a shopper, I want to filter the product grid by category so I can browse a single section without scrolling through everything.",
   "cases": [
     {
       "id": "TC-01",
-      "title": "All filter chips are visible on load",
+      "title": "Filter chips are visible on page load",
       "given": "User opens /eclat-shop.html",
       "when": "the page finishes rendering",
       "then": "all .fchip elements are visible",
@@ -15,36 +15,47 @@
     },
     {
       "id": "TC-02",
-      "title": "Clicking 'Tech' activates the filter chip",
-      "given": "User sees all filter chips",
-      "when": "user clicks on the 'Tech' .fchip",
-      "then": "'Tech' .fchip gains the .active class",
+      "title": "Activate 'Tech' filter chip",
+      "given": "Filter chips are visible",
+      "when": "user clicks the 'Tech' .fchip",
+      "then": "the 'Tech' .fchip gains the .active class",
       "selectors_hint": [
-        ".fchip.active"
+        ".fchip"
       ],
       "priority": "high"
     },
     {
       "id": "TC-03",
-      "title": "Filtering by 'Tech' shows relevant products",
-      "given": "User has activated the 'Tech' filter",
+      "title": "Filter products by 'Tech' category",
+      "given": "'Tech' filter chip is activated",
       "when": "the filter is applied",
-      "then": "only products with .pcard-cat matching 'Tech' are visible and #results-info updates to reflect the new count",
+      "then": "only .pcard elements with .pcard-cat matching 'Tech' are visible",
       "selectors_hint": [
         ".pcard",
-        "#results-info"
+        ".pcard-cat"
       ],
       "priority": "high"
     },
     {
       "id": "TC-04",
-      "title": "Clicking 'All' resets the filter",
-      "given": "User has filtered products by 'Tech'",
-      "when": "user clicks on the 'All' .fchip",
-      "then": "all products are visible again and #results-info reflects the original count",
+      "title": "Update results info after filtering by 'Tech'",
+      "given": "'Tech' filter chip is activated",
+      "when": "the filter is applied",
+      "then": "#results-info updates to show the count of 'Tech' products",
       "selectors_hint": [
-        ".fchip.active",
         "#results-info"
+      ],
+      "priority": "medium"
+    },
+    {
+      "id": "TC-05",
+      "title": "Reset filter by clicking 'All' chip",
+      "given": "'Tech' filter is active",
+      "when": "user clicks the 'All' .fchip",
+      "then": "all original .pcard elements are visible again",
+      "selectors_hint": [
+        ".fchip",
+        ".pcard"
       ],
       "priority": "high"
     }
