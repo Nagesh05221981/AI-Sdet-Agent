@@ -30,6 +30,14 @@ class HomePage {
         this.elements.searchInput().should('be.visible').type(text)
     }
 
+    clearSearch() {
+        cy.get('#search-input').clear()
+    }
+
+    search(term) {
+        cy.get('#search-input').clear().type(term)
+    }
+
     verifyUserLoggedIn() {
         cy.get('#user-chip').should('be.visible'); cy.get('#uname-label').should('not.be.empty')
     }
@@ -40,6 +48,10 @@ class HomePage {
 
     verifyUserLoggedOut() {
         cy.get('#auth-btns').should('be.visible')
+    }
+
+    verifySearchResults() {
+        cy.get('#results-info').should('not.be.empty')
     }
 
 }

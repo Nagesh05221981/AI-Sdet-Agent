@@ -1,0 +1,42 @@
+{
+  "feature": "User Login",
+  "story": "As a returning shopper, I want to log into my account so I can checkout.",
+  "cases": [
+    {
+      "id": "TC-01",
+      "title": "Auth modal opens on Login button click",
+      "given": "User opens /eclat-shop.html with a seeded user in localStorage",
+      "when": "user clicks the Login button",
+      "then": "the auth modal becomes visible",
+      "selectors_hint": [
+        "#auth-btns button",
+        "#auth-modal"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-02",
+      "title": "Login form displays email and password fields",
+      "given": "Auth modal is open",
+      "when": "user inspects the login form",
+      "then": "email and password input fields are visible",
+      "selectors_hint": [
+        "#auth-modal input[type='email']",
+        "#auth-modal input[type='password']"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-03",
+      "title": "User logs in with seeded credentials",
+      "given": "Auth modal is open and user enters valid credentials",
+      "when": "user submits the login form",
+      "then": "#user-chip becomes visible",
+      "selectors_hint": [
+        "#auth-modal button[type='submit']",
+        "#user-chip"
+      ],
+      "priority": "high"
+    }
+  ]
+}

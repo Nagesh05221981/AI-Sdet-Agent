@@ -1,0 +1,67 @@
+{
+  "feature": "Product Search and Checkout",
+  "story": "As a product owner I would like the user to be able to search one product, add it to the cart and checkout",
+  "cases": [
+    {
+      "id": "TC-01",
+      "title": "Search for a product",
+      "given": "User opens /eclat-shop.html",
+      "when": "User enters 'headphone' in the #search-input",
+      "then": "The product card with .pcard-name 'Wireless Noise-Cancelling Headphones' is visible",
+      "selectors_hint": [
+        "#search-input",
+        ".pcard",
+        ".pcard-name"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-02",
+      "title": "Add product to cart",
+      "given": "User has searched for 'headphone' and the product card is visible",
+      "when": "User clicks the .add-btn on the product card",
+      "then": "#cart-count increments by 1",
+      "selectors_hint": [
+        ".add-btn",
+        "#cart-count"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-03",
+      "title": "Checkout the cart",
+      "given": "User has added a product to the cart",
+      "when": "User clicks the Checkout button",
+      "then": "Order confirmation modal is visible",
+      "selectors_hint": [
+        ".cart-pill",
+        "#cart-count"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-04",
+      "title": "Dismiss order confirmation",
+      "given": "Order confirmation modal is visible",
+      "when": "User clicks the Continue Shopping button",
+      "then": "Order confirmation modal is no longer visible",
+      "selectors_hint": [
+        ".order-confirmation",
+        ".continue-shopping"
+      ],
+      "priority": "medium"
+    },
+    {
+      "id": "TC-05",
+      "title": "Clear search bar",
+      "given": "User has searched for 'headphone'",
+      "when": "User clears the #search-input",
+      "then": "The search input is empty and all products are visible",
+      "selectors_hint": [
+        "#search-input",
+        ".pcard"
+      ],
+      "priority": "medium"
+    }
+  ]
+}

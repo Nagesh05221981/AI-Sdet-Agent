@@ -1,0 +1,92 @@
+{
+  "feature": "Cart and Checkout",
+  "story": "As a product owner I would like the user to be able to select one product, add it to the cart and checkout",
+  "cases": [
+    {
+      "id": "TC-01",
+      "title": "Add product to cart",
+      "given": "User opens /eclat-shop.html",
+      "when": "User clicks the add button on a product card",
+      "then": "The cart count increases by 1 and the product is listed in the cart drawer",
+      "selectors_hint": [
+        ".add-btn",
+        "#cart-count",
+        "#drawer-body"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-02",
+      "title": "Verify product details in cart",
+      "given": "A product is added to the cart",
+      "when": "User opens the cart drawer",
+      "then": "The product name, quantity, and price are correctly displayed in the cart",
+      "selectors_hint": [
+        "#drawer-body",
+        ".pcard-name",
+        ".pcard-price"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-03",
+      "title": "Checkout with a product in cart",
+      "given": "A product is added to the cart",
+      "when": "User clicks the Checkout button",
+      "then": "The order confirmation modal is displayed",
+      "selectors_hint": [
+        "#checkout-btn",
+        "#confirm-modal"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-04",
+      "title": "Dismiss order confirmation",
+      "given": "Order confirmation modal is visible",
+      "when": "User clicks Continue Shopping button",
+      "then": "The order confirmation modal is closed",
+      "selectors_hint": [
+        "#confirm-modal",
+        ".btn-accent"
+      ],
+      "priority": "medium"
+    },
+    {
+      "id": "TC-05",
+      "title": "Add multiple products to cart",
+      "given": "User opens /eclat-shop.html",
+      "when": "User clicks add button on multiple product cards",
+      "then": "The cart count reflects the total number of products added",
+      "selectors_hint": [
+        ".add-btn",
+        "#cart-count"
+      ],
+      "priority": "medium"
+    },
+    {
+      "id": "TC-06",
+      "title": "Remove product from cart",
+      "given": "Multiple products are added to the cart",
+      "when": "User removes a product from the cart",
+      "then": "The cart count decreases and the product is no longer listed in the cart drawer",
+      "selectors_hint": [
+        "#drawer-body",
+        "#cart-count"
+      ],
+      "priority": "medium"
+    },
+    {
+      "id": "TC-07",
+      "title": "Adjust product quantity in cart",
+      "given": "A product is added to the cart",
+      "when": "User increases or decreases the product quantity",
+      "then": "The total price updates accordingly in the cart",
+      "selectors_hint": [
+        "#drawer-body",
+        ".total-val"
+      ],
+      "priority": "medium"
+    }
+  ]
+}

@@ -26,6 +26,10 @@ class Catalogue {
         cy.get('.pcard').should('have.length', count)
     }
 
+    verifyNoResults() {
+        cy.get('#no-results').should('be.visible')
+    }
+
 }
 
 export default Catalogue

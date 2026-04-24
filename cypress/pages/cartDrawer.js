@@ -23,11 +23,11 @@ class CartDrawer {
     }
 
     increaseQty(name) {
-        cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qbtn').contains('+').click()
+        cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qbtn').last().click()
     }
 
     decreaseQty(name) {
-        cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qbtn').contains('-').click()
+        cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qbtn').first().click()
     }
 
     dismissOrderConfirmation() {
@@ -35,7 +35,7 @@ class CartDrawer {
     }
 
     verifyCartEmpty() {
-        cy.get('#drawer-body').should('be.empty')
+        cy.get('#drawer-body').find('.ci').should('not.exist')
     }
 
     verifyCartItemPresent(name) {
@@ -43,7 +43,7 @@ class CartDrawer {
     }
 
     verifyCartItemQuantity(name, quantity) {
-        cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qval').should('contain', String(quantity))
+        cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qval').invoke('text').then(t => expect(parseInt(t)).to.equal(quantity))
     }
 
     verifyCheckoutDisabled() {

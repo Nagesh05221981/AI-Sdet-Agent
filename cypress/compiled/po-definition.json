@@ -129,6 +129,20 @@
               "value": "text"
             }
           ]
+        },
+        {
+          "name": "clearSearch",
+          "params": [],
+          "code": "cy.get('#search-input').clear()",
+          "steps": []
+        },
+        {
+          "name": "search",
+          "params": [
+            "term"
+          ],
+          "code": "cy.get('#search-input').clear().type(term)",
+          "steps": []
         }
       ],
       "verifications": [
@@ -150,6 +164,12 @@
           "name": "verifyUserLoggedOut",
           "params": [],
           "code": "cy.get('#auth-btns').should('be.visible')",
+          "steps": []
+        },
+        {
+          "name": "verifySearchResults",
+          "params": [],
+          "code": "cy.get('#results-info').should('not.be.empty')",
           "steps": []
         }
       ]
@@ -525,6 +545,12 @@
           ],
           "code": "cy.get('.pcard').should('have.length', count)",
           "steps": []
+        },
+        {
+          "name": "verifyNoResults",
+          "params": [],
+          "code": "cy.get('#no-results').should('be.visible')",
+          "steps": []
         }
       ]
     },
@@ -644,7 +670,7 @@
           "params": [
             "name"
           ],
-          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qbtn').contains('+').click()",
+          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qbtn').last().click()",
           "steps": []
         },
         {
@@ -652,7 +678,7 @@
           "params": [
             "name"
           ],
-          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qbtn').contains('-').click()",
+          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qbtn').first().click()",
           "steps": []
         },
         {
@@ -666,7 +692,7 @@
         {
           "name": "verifyCartEmpty",
           "params": [],
-          "code": "cy.get('#drawer-body').should('be.empty')",
+          "code": "cy.get('#drawer-body').find('.ci').should('not.exist')",
           "steps": []
         },
         {
@@ -683,7 +709,7 @@
             "name",
             "quantity"
           ],
-          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qval').should('contain', String(quantity))",
+          "code": "cy.get('#drawer-body').contains('.ci-name', name).parents('.ci').find('.qval').invoke('text').then(t => expect(parseInt(t)).to.equal(quantity))",
           "steps": []
         },
         {

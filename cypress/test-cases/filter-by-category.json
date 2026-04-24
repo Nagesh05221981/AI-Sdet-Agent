@@ -1,0 +1,63 @@
+{
+  "feature": "Filter by Category",
+  "story": "As a shopper, I want to filter the product grid by category so I can browse a single section without scrolling through everything.",
+  "cases": [
+    {
+      "id": "TC-01",
+      "title": "All filter chips are visible on page load",
+      "given": "User opens /eclat-shop.html",
+      "when": "the page finishes rendering",
+      "then": "all .fchip elements are visible",
+      "selectors_hint": [
+        ".fchip"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-02",
+      "title": "Activate 'Tech' filter chip",
+      "given": "User opens /eclat-shop.html",
+      "when": "user clicks the 'Tech' .fchip",
+      "then": "the 'Tech' .fchip gains the .active class",
+      "selectors_hint": [
+        ".fchip"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-03",
+      "title": "Filter products by 'Tech' category",
+      "given": "'Tech' filter chip is activated",
+      "when": "the filter is applied",
+      "then": "only .pcard elements with .pcard-cat matching 'Tech' are visible",
+      "selectors_hint": [
+        ".pcard",
+        ".pcard-cat"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "TC-04",
+      "title": "#results-info updates after filtering by 'Tech'",
+      "given": "'Tech' filter chip is activated",
+      "when": "the filter is applied",
+      "then": "#results-info reflects the count of visible 'Tech' products",
+      "selectors_hint": [
+        "#results-info"
+      ],
+      "priority": "medium"
+    },
+    {
+      "id": "TC-05",
+      "title": "Reset filter by clicking 'All' chip",
+      "given": "'Tech' filter chip is activated",
+      "when": "user clicks the 'All' .fchip",
+      "then": "all original .pcard elements reappear and the 'All' .fchip gains the .active class",
+      "selectors_hint": [
+        ".fchip",
+        ".pcard"
+      ],
+      "priority": "high"
+    }
+  ]
+}
