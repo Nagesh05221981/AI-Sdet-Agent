@@ -6,3 +6,4 @@ cypress/videos/
 cypress-failure.log
 cypress-failure-context.json
 pipeline.log
+conversation.txt
